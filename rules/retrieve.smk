@@ -5,7 +5,7 @@
 import requests
 from datetime import datetime, timedelta
 
-if config["enable"].get("retrieve", "auto") == "auto":
+if config["enable"].get("retrieve", "auto") == "auto": ########## .get("clave", "default") se usa para acceder de manera segura a un diccionario. Intenta coger el valor asociado a "clave", y si no existe esa clave, devuelve "default"
     config["enable"]["retrieve"] = has_internet_access()
 
 if config["enable"]["retrieve"] is False:
