@@ -61,7 +61,7 @@ if config["enable"].get("retrieve_irena"):
             "../scripts/retrieve_irena.py"
 
 
-if config["enable"]["retrieve"] and config["enable"].get("retrieve_cutout", True):
+if config["enable"]["retrieve"] and config["enable"].get("retrieve_cutout", True) and not config.get("pypsa_es", False): ########## Añado excepción ibérica, para que si es FALSE se meta por aquí
 
     rule retrieve_cutout:
         input:
@@ -78,6 +78,26 @@ if config["enable"]["retrieve"] and config["enable"].get("retrieve_cutout", True
         run:
             move(input[0], output[0])
             validate_checksum(output[0], input[0])
+
+
+
+if config["enable"]["retrieve"] and config["enable"].get("retrieve_cutout", True) and config.get("pypsa_es", False): ########## Añado excepción ibérica, para que si es TRUE se meta por aquí
+
+    rule retrieve_cutout:
+        input:
+            storage(
+                "https://drive.upm.es/s/zOn8qSf7hnsX9DP/download",
+            ),
+        output:
+            protected("cutouts/" + CDIR + "{cutout}.nc"),
+        log:
+            "logs/" + CDIR + "retrieve_cutout_{cutout}.log",
+        resources:
+            mem_mb=5000,
+        retries: 2
+        run:
+            move(input[0], output[0])
+            # validate_checksum(output[0], input[0]) ########## Elimino el checksum, que está hecho para el enlace zenodo
 
 
 if config["enable"]["retrieve"] and config["enable"].get("retrieve_cost_data", True):
