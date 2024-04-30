@@ -12,9 +12,10 @@ if config["enable"]["retrieve"] is False:
     print("Datafile downloads disabled in config[retrieve] or no internet access.")
 
 
+########## Si comento alguno de los siguientes archivos no consigo evitar la descarga, ya que todo va en un comprimido. Lo que sucede es que al final no lo progege para evitar que sea borrado, ver más abajo en 'outputs' de la rule 'retrieve_databundle'.
 if config["enable"]["retrieve"] and config["enable"].get("retrieve_databundle", True):
     datafiles = [
-        # "ch_cantons.csv", ########## Lo comento, no es necesario, aunque lo que se descarga es el comprimido.. ¿lo borrará?
+        "ch_cantons.csv", 
         "je-e-21.03.02.xls",
         "eez/World_EEZ_v8_2014.shp",
         "hydro_capacities.csv",
