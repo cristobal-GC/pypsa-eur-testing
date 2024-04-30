@@ -14,7 +14,7 @@ if config["enable"]["retrieve"] is False:
 
 if config["enable"]["retrieve"] and config["enable"].get("retrieve_databundle", True):
     datafiles = [
-        "ch_cantons.csv",
+        # "ch_cantons.csv", ########## Lo comento, no es necesario, aunque lo que se descarga es el comprimido.. ¿lo borrará?
         "je-e-21.03.02.xls",
         "eez/World_EEZ_v8_2014.shp",
         "hydro_capacities.csv",
@@ -30,7 +30,7 @@ if config["enable"]["retrieve"] and config["enable"].get("retrieve_databundle", 
 
     rule retrieve_databundle:
         output:
-            protected(expand("data/bundle/{file}", file=datafiles)),
+            protected(expand("data/bundle/{file}", file=datafiles)), ########## "expand" es para generar la lista de archivos a partir de "datafiles". "protected" es para marcarlos como protegidos para evitar su eliminación automática por parte de Snakemake.
         log:
             "logs/retrieve_databundle.log",
         resources:
