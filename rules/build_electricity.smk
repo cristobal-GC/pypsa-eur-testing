@@ -309,7 +309,7 @@ rule build_renewable_profiles:
         + config_provider("renewable", w.technology, "cutout")(w)
         + ".nc",
     output:
-        profile=resources("profile_{technology}.nc"),
+        profile=resources("profile_{technology}_initial.nc"), ########## Modifico el nombre de los outputs, que serán los inputs de otra rule que aplicará una transformada y le dará el nombre final "profile_{technology}
     log:
         logs("build_renewable_profile_{technology}.log"),
     benchmark:
@@ -323,6 +323,33 @@ rule build_renewable_profiles:
         "../envs/environment.yaml"
     script:
         "../scripts/build_renewable_profiles.py"
+
+
+
+
+########## Add rule to transform renewable HCF according to a predefined q2q_transform
+
+rule apply_q2q_renewable_profiles:
+    params:
+        q2q_transform=config_provider("pypsa_es","q2q_transforms"),
+    input:
+        profile_initial=resources("profile_{technology}_initial.nc"),
+    output:
+        profile=resources("profile_{technology}.nc"),
+    log:
+        logs("apply_q2q_renewable_profile_{technology}.log"),
+    benchmark:
+        benchmarks("apply_q2q_renewable_profile_{technology}")
+    threads: 1
+    conda:
+        "../envs/environment.yaml"
+    script:
+        "../scripts/apply_q2q_renewable_profiles.py"
+        
+
+
+
+
 
 
 rule build_monthly_prices:

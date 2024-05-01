@@ -61,7 +61,7 @@ if config["enable"].get("retrieve_irena"):
             "../scripts/retrieve_irena.py"
 
 
-if config["enable"]["retrieve"] and config["enable"].get("retrieve_cutout", True) and not config.get("pypsa_es", False): ########## Añado excepción ibérica, para que si es FALSE se meta por aquí
+if config["enable"]["retrieve"] and config["enable"].get("retrieve_cutout", True) and not config["pypsa_es"].get("cutout", False): ########## Añado excepción ibérica, para que si es FALSE se meta por aquí
 
     rule retrieve_cutout:
         input:
@@ -81,7 +81,7 @@ if config["enable"]["retrieve"] and config["enable"].get("retrieve_cutout", True
 
 
 
-if config["enable"]["retrieve"] and config["enable"].get("retrieve_cutout", True) and config.get("pypsa_es", False): ########## Añado excepción ibérica, para que si es TRUE se meta por aquí
+if config["enable"]["retrieve"] and config["enable"].get("retrieve_cutout", True) and config["pypsa_es"].get("cutout", False): ########## Añado excepción ibérica, para que si es TRUE se meta por aquí
 
     rule retrieve_cutout:
         input:

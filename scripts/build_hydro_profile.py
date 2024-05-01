@@ -118,6 +118,20 @@ def get_eia_annual_hydro_generation(fn, countries, capacities=False):
     df.index = cc.convert(df.index, to="iso2")
     df.index.name = "countries"
 
+
+    ########## If there is no data for ES in 2022, add it (source: REE)
+    # Note that 2022 is handled as a number. If '2022' as a string, actual 2022 is taken as missing year later in the script, and an error arises
+    if 2022 not in df.columns:
+        df[2022] = float('nan')
+        print(f'########## pypsa-es comment: keys are {df.index}')
+        if not capacities:
+            df.loc['ES', 2022] = 17.86
+            print(f'########## INFO[pypsa-es]: hydro GENERATION for was added for 2022: {df.loc["ES", 2022]}')
+        else:
+            df.loc['ES', 2022] = df.loc['ES', 2021]
+            print(f'########## INFO[pypsa-es]: hydro CAPACITY for was added for 2022: {df.loc["ES", 2022]}')
+
+
     # convert to MW of MWh/a
     factor = 1e3 if capacities else 1e6
     df = df.T[countries] * factor
