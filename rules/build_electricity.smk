@@ -18,29 +18,63 @@ if config["enable"].get("prepare_links_p_nom", False):
             "../scripts/prepare_links_p_nom.py"
 
 
-rule build_electricity_demand:
-    params:
-        snapshots=config_provider("snapshots"),
-        drop_leap_day=config_provider("enable", "drop_leap_day"),
-        countries=config_provider("countries"),
-        load=config_provider("load"),
-    input:
-        reported=ancient("data/electricity_demand_raw.csv"),
-        synthetic=lambda w: (
-            ancient("data/load_synthetic_raw.csv")
-            if config_provider("load", "supplement_synthetic")(w)
-            else []
-        ),
-    output:
-        resources("electricity_demand.csv"),
-    log:
-        logs("build_electricity_demand.log"),
-    resources:
-        mem_mb=5000,
-    conda:
-        "../envs/environment.yaml"
-    script:
-        "../scripts/build_electricity_demand.py"
+
+
+########## This is the conventional script, so use it only if pypsa_es:electricity_demand:customised is false
+if not config["pypsa_es"]["electricity_demand"].get("customised", False):
+    rule build_electricity_demand:
+        params:
+            snapshots=config_provider("snapshots"),
+            drop_leap_day=config_provider("enable", "drop_leap_day"),
+            countries=config_provider("countries"),
+            load=config_provider("load"),
+        input:
+            reported=ancient("data/electricity_demand_raw.csv"),
+            synthetic=lambda w: (
+                ancient("data/load_synthetic_raw.csv")
+                if config_provider("load", "supplement_synthetic")(w)
+                else []
+            ),
+        output:
+            resources("electricity_demand.csv"),
+        log:
+            logs("build_electricity_demand.log"),
+        resources:
+            mem_mb=5000,
+        conda:
+            "../envs/environment.yaml"
+        script:
+            "../scripts/build_electricity_demand.py"
+
+
+########## And this is the new one to be employed when customised electricity demand is provided for ES   (DE MOMENTO ES UNA COPIA DE LA ANTERIOR: TRABAJAR EN ELLA)
+if config["pypsa_es"]["electricity_demand"].get("customised", False):
+    rule build_electricity_demand:
+        params:
+            snapshots=config_provider("snapshots"),
+            drop_leap_day=config_provider("enable", "drop_leap_day"),
+            countries=config_provider("countries"),
+            load=config_provider("load"),
+        input:
+            reported=ancient("data/electricity_demand_raw.csv"),
+            synthetic=lambda w: (
+                ancient("data/load_synthetic_raw.csv")
+                if config_provider("load", "supplement_synthetic")(w)
+                else []
+            ),
+        output:
+            resources("electricity_demand.csv"),
+        log:
+            logs("build_electricity_demand.log"),
+        resources:
+            mem_mb=5000,
+        conda:
+            "../envs/environment.yaml"
+        script:
+            "../scripts/build_electricity_demand.py"
+
+
+
 
 
 rule build_powerplants:

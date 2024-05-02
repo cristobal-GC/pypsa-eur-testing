@@ -197,7 +197,8 @@ if config["enable"]["retrieve"]:
             "../scripts/retrieve_gas_infrastructure_data.py"
 
 
-if config["enable"]["retrieve"]:
+
+if config["enable"]["retrieve"] and not config["pypsa_es"]["electricity_demand"].get("customised", False): ########## Si se va a proporcionar customised demand, entonces que no descargue el archivo pesado
 
     rule retrieve_electricity_demand:
         params:
