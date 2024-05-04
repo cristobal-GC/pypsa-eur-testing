@@ -61,7 +61,7 @@ if config["enable"].get("retrieve_irena"):
             "../scripts/retrieve_irena.py"
 
 
-if config["enable"]["retrieve"] and config["enable"].get("retrieve_cutout", True) and not config["pypsa_es"].get("cutout", False): ########## Añado excepción ibérica, para que si es FALSE se meta por aquí
+if config["enable"]["retrieve"] and config["enable"].get("retrieve_cutout", True) and not config["pypsa_es"].get("ES_cutout", False): ########## Añado excepción ibérica, para que si es FALSE se meta por aquí
 
     rule retrieve_cutout:
         input:
@@ -81,7 +81,7 @@ if config["enable"]["retrieve"] and config["enable"].get("retrieve_cutout", True
 
 
 
-if config["enable"]["retrieve"] and config["enable"].get("retrieve_cutout", True) and config["pypsa_es"].get("cutout", False): ########## Añado excepción ibérica, para que si es TRUE se meta por aquí
+if config["enable"]["retrieve"] and config["enable"].get("retrieve_cutout", True) and config["pypsa_es"].get("ES_cutout", False): ########## Añado excepción ibérica, para que si es TRUE se meta por aquí
 
     rule retrieve_cutout:
         input:
@@ -198,7 +198,7 @@ if config["enable"]["retrieve"]:
 
 
 
-if config["enable"]["retrieve"] and not config["pypsa_es"]["electricity_demand"].get("customised", False): ########## Si se va a proporcionar customised demand, entonces que no descargue el archivo pesado
+if config["enable"]["retrieve"]: ########## LO SIGUIENTE EN REALIDAD NO HACE FALTA, BASTA CON NO REQUERIR electricity_demand_raw.csv ###  and not config["pypsa_es"]["electricity_demand"].get("customised", False): ########## Si se va a proporcionar customised demand, entonces que no descargue el archivo pesado
 
     rule retrieve_electricity_demand:
         params:

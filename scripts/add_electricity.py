@@ -271,7 +271,7 @@ def load_powerplants(ppl_fn):
         "bioenergy": "biomass",
         "ccgt, thermal": "CCGT",
         "hard coal": "coal",
-        "natural gas": "OCGT",
+        "natural gas": "CCGT", ########## "OCGT", to fit the Spanish case
     }
     return (
         pd.read_csv(ppl_fn, index_col=0, dtype={"bus": "str"})
@@ -296,43 +296,120 @@ def shapes_to_shapes(orig, dest):
     return transfer
 
 
-def attach_load(n, regions, load, nuts3_shapes, ua_md_gdp, countries, scaling=1.0):
-    substation_lv_i = n.buses.index[n.buses["substation_lv"]]
-    regions = gpd.read_file(regions).set_index("name").reindex(substation_lv_i)
-    opsd_load = pd.read_csv(load, index_col=0, parse_dates=True).filter(items=countries)
 
+
+
+########## The idea of this new version of attach_load is to:
+# Provide a real load time series for a region (community/province), instead that for a whole country
+# The regions are given through the columns of the outputs at build_electricity_demand_vES.py
+# Within this region (community/province), the corresponding time series is added to all the substations, 
+# weighted according to shared area, gdp and and population of the NUTS3 where the substation is (as it was done before within each country)
+def attach_load(n, regions, load, nuts3_shapes, NUTS2_ES, ua_md_gdp, countries, scaling=1.0):
+
+    ########## Devuelve, de los 1109 buses que hay en la península, los índices de los 522 que son True en "substation_lv
+    substation_lv_i = n.buses.index[n.buses["substation_lv"]]
+
+    ########## Devuelve un gdf con index=name, con las 522 regiones que contienen las subestaciones
+    # Las columnas son: x, y, country, geometry
+    regions = gpd.read_file(regions).set_index("name").reindex(substation_lv_i) ########## .reindex() es para filtrar!!! 
+
+    ########## Original: devuelve un df, en las columnas las series temporales horarias de los países en 'countries'
+    #     opsd_load = pd.read_csv(load, index_col=0, parse_dates=True).filter(items=countries)
+    ########## Modificada: devuelve un df, en las columnas las series temporales horarias de las regiones customizadas.
+    opsd_load = pd.read_csv(load, index_col=0, parse_dates=True)########## Quito este filtrado por países: .filter(items=country)
+
+    ########## Devuelve un df con 150 filas: index: name (4 números?), GDP_PPP, country, son regiones de Moldavia y Ukraine 
     ua_md_gdp = pd.read_csv(ua_md_gdp, dtype={"name": "str"}).set_index("name")
 
     logger.info(f"Load data scaled by factor {scaling}.")
     opsd_load *= scaling
 
+    ########## Devuelve un gdf con index=CCnnn (código de país y NUTS3)
+    # Las columnas son: pop, gdp, country, geometry
     nuts3 = gpd.read_file(nuts3_shapes).set_index("index")
 
+    # Cargo también nuts2 para tener el "NAME_DATADIS" asociado al "NUTS_ID" nivel 2: ESnn
+    nuts2 = gpd.read_file(NUTS2_ES).set_index("id")
+
+
+    ########## Esta función se llama con un .groupby, de modo que:
+    # cntry: son los países que hay en regions.country (de momento solo ES)
+    # group: son las (522) geometrías que hay en regions.geometry del país cntry(=ES), el índice es el nº de bus
     def upsample(cntry, group):
-        load = opsd_load[cntry]
+        
+        ########## Voy a tomar las regiones dentro de España que vienen de las columnas de opsd_load
+        
+        ##### Original
+        #load = opsd_load[cntry]
+        #if len(group) == 1:
+        #    return pd.DataFrame({group.index[0]: load})
 
-        if len(group) == 1:
-            return pd.DataFrame({group.index[0]: load})
-        nuts3_cntry = nuts3.loc[nuts3.country == cntry]
-        transfer = shapes_to_shapes(group, nuts3_cntry.geometry).T.tocsr()
-        gdp_n = pd.Series(
-            transfer.dot(nuts3_cntry["gdp"].fillna(1.0).values), index=group.index
-        )
-        pop_n = pd.Series(
-            transfer.dot(nuts3_cntry["pop"].fillna(1.0).values), index=group.index
-        )
+        return_total = pd.DataFrame(0, index = opsd_load.index, columns = group.index) ########## aquí vamos a ir sumando los return_rr (cada uno tiene series temporales de load solo en las subestaciones que están en su rr)
 
-        # relative factors 0.6 and 0.4 have been determined from a linear
-        # regression on the country to continent load data
-        factors = normed(0.6 * normed(gdp_n) + 0.4 * normed(pop_n))
-        if cntry in ["UA", "MD"]:
-            # overwrite factor because nuts3 provides no data for UA+MD
-            factors = normed(ua_md_gdp.loc[group.index, "GDP_PPP"].squeeze())
-        return pd.DataFrame(
-            factors.values * load.values[:, np.newaxis],
-            index=load.index,
-            columns=factors.index,
-        )
+
+
+        for rr in opsd_load.columns:
+
+            load = opsd_load[rr]
+
+
+            ########## Si hay menos de 19 loads, vamos por comunidades
+            if opsd_load.shape[1]<19:
+                # Obtén el codigo nuts2 de la región rr
+                codigo_nutsX_rr = nuts2.loc[ nuts2['NAME_DATADIS']==rr , 'NUTS_ID' ].iloc[0]
+            # sino, por provincias
+            else:
+                codigo_nutsX_rr = nuts3.loc[ nuts3['NAME_DATADIS']==rr , 'NUTS_ID' ].iloc[0] ##### Todavía no tengo este nuts3 con datadis names
+
+
+            ##### Original: coge los NUTS3 del país
+            # nuts3_cntry = nuts3.loc[nuts3.country == cntry]   
+
+            ##### Nuevo: coge los NUTS3 de la región rr
+            nuts3_rr = nuts3[nuts3.index.str.contains(codigo_nutsX_rr)]   
+
+
+            ########## Esto es para obtener una matriz con porcentajes de área de solape, las filas son las ~522 subestaciones y las columnas son provincias NUTS3 en región rr
+            transfer = shapes_to_shapes(group, nuts3_rr.geometry).T.tocsr()   
+
+
+            ########## Devuelve una serie de las subestaciones con la multiplicación área solapada x gdp de cada NUTS3 de rr
+            gdp_n = pd.Series(
+                transfer.dot(nuts3_rr["gdp"].fillna(1.0).values), index=group.index    
+            )
+
+            ########## Devuelve una serie de las subestaciones con la multiplicación área solapada x pop de cada NUTS3 de rr
+            pop_n = pd.Series(
+                transfer.dot(nuts3_rr["pop"].fillna(1.0).values), index=group.index    
+            )
+
+
+
+            # relative factors 0.6 and 0.4 have been determined from a linear
+            # regression on the country to continent load data
+            factors = normed(0.6 * normed(gdp_n) + 0.4 * normed(pop_n))   ########## normed normaliza un vector entre 0 y 1
+            #if cntry in ["UA", "MD"]:
+            #    # overwrite factor because nuts3 provides no data for UA+MD
+            #    factors = normed(ua_md_gdp.loc[group.index, "GDP_PPP"].squeeze())
+
+
+            ############ Lo que originalmente es ya el return de esta función, lo guardo en return_rr de una región del bucle
+            return_rr = pd.DataFrame(
+                factors.values * load.values[:, np.newaxis], 
+                index=load.index,
+                columns=factors.index,
+            )
+
+
+            return_total += return_rr
+
+
+
+
+        ########## Lo que devuelve la siguiente operación es un dataframe con filas = 8760 horas, índices = 522 subestaciones. Cada columna es una load, todas son proporcionales, solo cambia el peso
+        return return_total
+
+
 
     load = pd.concat(
         [
@@ -341,6 +418,11 @@ def attach_load(n, regions, load, nuts3_shapes, ua_md_gdp, countries, scaling=1.
         ],
         axis=1,
     )
+
+
+
+
+
 
     n.madd(
         "Load", substation_lv_i, bus=substation_lv_i, p_set=load
@@ -815,11 +897,13 @@ if __name__ == "__main__":
     )
     ppl = load_powerplants(snakemake.input.powerplants)
 
+
     attach_load(
         n,
         snakemake.input.regions,
         snakemake.input.load,
         snakemake.input.nuts3_shapes,
+        snakemake.input.NUTS2_ES, ########## Meto NUTS2 para identificar comunidades con nombres datadis
         snakemake.input.ua_md_gdp,
         params.countries,
         params.scaling_factor,

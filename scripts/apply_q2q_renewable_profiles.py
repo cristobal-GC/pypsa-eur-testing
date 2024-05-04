@@ -19,8 +19,8 @@ from _helpers import configure_logging, set_scenario_config
 
 
 ##### Just during testing
-import pandas as pd
-import io                ########## Esto es solo para exportar fácilmente un string vía df
+# import pandas as pd
+# import io                ########## Esto es solo para exportar fácilmente un string vía df
 
 
 if __name__ == "__main__":
