@@ -137,12 +137,19 @@ if __name__ == "__main__":
 
         onshore_shape = country_shapes[country]
         onshore_locs = (
-            n.buses.loc[c_b & n.buses.onshore_bus]
-            .sort_values(
-                by="substation_lv", ascending=False
-            )  # preference for substations
+            n.buses.loc[c_b & n.buses.onshore_bus & n.buses.substation_lv]   ########## Aquí añado "& substation_lv" para que solo coja donde habrá loads!!!
+            #.sort_values(                                                   ### Y quito lo de ordenar by substation_lv
+            #    by="substation_lv", ascending=False
+            #)  # preference for substations
             .drop_duplicates(subset=["x", "y"], keep="first")[["x", "y"]]
         )
+
+        ########## Quizá aquí es el sitio para quitar los buses que no tendrán load <<< con lo de arriba han pasado de ~900 a 522!!
+        #print(onshore_locs)
+        #input('Ooh waiT...')
+
+
+
         onshore_regions.append(
             gpd.GeoDataFrame(
                 {

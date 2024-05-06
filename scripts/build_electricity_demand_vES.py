@@ -24,7 +24,6 @@ logger = logging.getLogger(__name__)
 
 
 
-
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -42,11 +41,17 @@ if __name__ == "__main__":
     annual_electricity_demand = snakemake.params.annual_electricity_demand
 
     ##### Load profiles
-    df_profiles = pd.read_csv(snakemake.params.profiles, index_col=0)
-    df_profiles.fillna(0, inplace=True)
+    df_profiles = pd.read_csv(snakemake.params.profiles, index_col=0)#.fillna(0, inplace=True)
+
 
     ##### Load percentages
     df_percentages = pd.read_csv(snakemake.params.percentages, index_col=0)
+
+
+    ##### Load dic_datadis, that contains relevant info
+    with open(snakemake.input.dic_datadis, 'r') as file:
+        dic_datadis = yaml.safe_load(file)
+
 
 
 
@@ -59,38 +64,37 @@ if __name__ == "__main__":
 
 
 
-    #################### Load dic with communities or provinces if required
+    #################### Load dic with communities or provinces, according to the number of columns in df_profiles
 
-    ##### If communities
-    if 'Galicia' in df_percentages.columns:
-        with open(snakemake.input.dic_communities, 'r') as file:
-            dic_regions = yaml.safe_load(file)
-
+    if df_percentages.shape[1] == 16:
+        dic_region = dic_datadis['dic_community_NUTSid']
+    if df_percentages.shape[1] == 48:
+        dic_region = dic_datadis['dic_province_NUTSid']
+   
 
 
 
     ############### Loop to combine profiles, percentages and annual demand
 
     ##### Check if dic_regions exists (use the dic name as string, otherwise it does not work)
-    if 'dic_regions' in locals():
-
+    if 'dic_region' in locals():
 
 
         ##### Loop over rr and ff, multiply each profile by corresponding factor
 
-        for rr in dic_regions.values():
+        for rr in dic_region.values():  # rr are the NUTS_ID
 
 
 
-            for ff_values in df_percentages.index:
+            for ff in df_percentages.index:
 
 
                 ### *1e6 because annaul_electricity_demand is provided in TWh, but the time series is in MWh
                 ### /8760 because hourly profiles have been obtained with the mean load, not the sum
                 ### /100 because percentages are over 100
-                factor = (annual_electricity_demand * 1e6 / 8760 )* df_percentages.at[ff_values,rr] / 100
+                factor = (annual_electricity_demand * 1e6 / 8760 )* df_percentages.at[ff,rr] / 100
 
-                df_profiles.loc[:,f'{rr}-{ff_values}'] = df_profiles[f'{rr}-{ff_values}'] * factor
+                df_profiles.loc[:,f'{rr}-{ff}'] = df_profiles[f'{rr}-{ff}'] * factor
 
 
 
@@ -120,3 +124,6 @@ if __name__ == "__main__":
 
 
     df_output.round(4).to_csv(snakemake.output[0], float_format='%.4f')
+
+
+

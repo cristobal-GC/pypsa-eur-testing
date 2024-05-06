@@ -45,18 +45,19 @@ if not config["pypsa_es"]["electricity_demand"].get("customised", False):
             "../scripts/build_electricity_demand.py"
 
 
-########## And this is the alternative rule, to be employed when customised electricity demand is provided for ES   (DE MOMENTO ES UNA COPIA DE LA ANTERIOR: TRABAJAR EN ELLA)
+
+########## And this is the alternative rule, to be employed when customised electricity demand is provided for ES
 if config["pypsa_es"]["electricity_demand"].get("customised", False):
     rule build_electricity_demand:
         input:
-            dic_communities=ancient("data/bundle_ES/dic_communities.yaml"),
+            dic_datadis=ancient("data/bundle_ES/datadis/dic_datadis.yaml"),
         params:
-            snapshots=config_provider("snapshots"),
-            drop_leap_day=config_provider("enable", "drop_leap_day"),
             annual_electricity_demand=config_provider("pypsa_es","electricity_demand","annual_value"),
             profiles=config_provider("pypsa_es","electricity_demand","profiles"),
+            percentages=config_provider("pypsa_es","electricity_demand","percentages"),            
+            snapshots=config_provider("snapshots"),
+            drop_leap_day=config_provider("enable", "drop_leap_day"),            
             #load=config_provider("load"),
-            percentages=config_provider("pypsa_es","electricity_demand","percentages"),
         output:
             resources("electricity_demand.csv"),
         log:
@@ -502,7 +503,6 @@ rule add_electricity:
         load=resources("electricity_demand.csv"),
         nuts3_shapes=resources("nuts3_shapes.geojson"),
         ua_md_gdp="data/GDP_PPP_30arcsec_v3_mapped_default.csv",
-        NUTS2_ES="data/bundle_ES/NUTS2_ES.geojson",
     output:
         resources("networks/elec.nc"),
     log:
