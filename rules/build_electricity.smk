@@ -157,6 +157,7 @@ rule build_shapes:
 rule build_bus_regions:
     params:
         countries=config_provider("countries"),
+        Voronoi_only_where_loads=config_provider("pypsa_es", "Voronoi_only_where_loads"), ########## Include token to enable modification
     input:
         country_shapes=resources("country_shapes.geojson"),
         offshore_shapes=resources("offshore_shapes.geojson"),
@@ -478,6 +479,7 @@ rule add_electricity:
         conventional=config_provider("conventional"),
         costs=config_provider("costs"),
         drop_leap_day=config_provider("enable", "drop_leap_day"),
+        keep_CCGT=config_provider("pypsa_es", "keep_CCGT"), ########## add token to keep CCGT in Spain
     input:
         unpack(input_profile_tech),
         unpack(input_conventional),
@@ -504,7 +506,7 @@ rule add_electricity:
         nuts3_shapes=resources("nuts3_shapes.geojson"),
         ua_md_gdp="data/GDP_PPP_30arcsec_v3_mapped_default.csv",
     output:
-        resources("networks/elec.nc"),
+        resources("networks/elec_initial.nc"),
     log:
         logs("add_electricity.log"),
     benchmark:
@@ -516,6 +518,34 @@ rule add_electricity:
         "../envs/environment.yaml"
     script:
         "../scripts/add_electricity.py"
+
+
+
+
+########## Update generator capacities according to REE data
+
+rule update_elec_capacities: 
+    params:
+        update_with_REE=config_provider("pypsa_es", "generator_capacities", "update_with_REE"),
+        carriers_to_update=config_provider("pypsa_es", "generator_capacities", "carriers_to_update"),
+    input:
+        elec_initial=resources("networks/elec_initial.nc"),
+        nuts2_ES='data/bundle_ES/nuts/NUTS2_ES.geojson',
+        dic_nuts='data/bundle_ES/nuts/dic_nuts.yaml',
+    output:
+        elec=resources("networks/elec.nc"),
+    log:
+        logs("update_elec_capacities.log"),
+    benchmark:
+        benchmarks("update_elec_capacities")
+    threads: 1
+    conda:
+        "../envs/environment.yaml"
+    script:
+        "../scripts/update_elec_capacities.py"
+
+
+
 
 
 rule simplify_network:

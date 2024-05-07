@@ -264,15 +264,28 @@ def load_costs(tech_costs, config, max_hours, Nyears=1.0):
     return costs
 
 
-def load_powerplants(ppl_fn):
-    carrier_dict = {
-        "ocgt": "OCGT",
-        "ccgt": "CCGT",
-        "bioenergy": "biomass",
-        "ccgt, thermal": "CCGT",
-        "hard coal": "coal",
-        "natural gas": "CCGT", ########## "OCGT", to fit the Spanish case
-    }
+def load_powerplants(ppl_fn, keep_CCGT):
+    ########## Token to keep CCGT
+    if keep_CCGT:        
+        carrier_dict = {
+            "ocgt": "OCGT",
+            "ccgt": "CCGT",
+            "bioenergy": "biomass",
+            "ccgt, thermal": "CCGT",
+            "hard coal": "coal",
+            "natural gas": "CCGT", ########## replacing "OCGT", to fit the Spanish case
+        }
+    ### otherwise, do it as usual
+    else:
+        carrier_dict = {
+            "ocgt": "OCGT",
+            "ccgt": "CCGT",
+            "bioenergy": "biomass",
+            "ccgt, thermal": "CCGT",
+            "hard coal": "coal",
+            "natural gas": "OCGT", 
+        }
+
     return (
         pd.read_csv(ppl_fn, index_col=0, dtype={"bus": "str"})
         .powerplant.to_pypsa_names()
@@ -350,6 +363,7 @@ def attach_load(n, regions, load, nuts3_shapes, ua_md_gdp, countries, scaling=1.
             load = opsd_load[rr_ID]
 
 
+
             ##### Original: coge los NUTS3 del país
             # nuts3_cntry = nuts3.loc[nuts3.country == cntry]   
 
@@ -363,15 +377,12 @@ def attach_load(n, regions, load, nuts3_shapes, ua_md_gdp, countries, scaling=1.
 
 
 
+
             ########## Devuelve una serie de las subestaciones con la multiplicación área solapada x gdp de cada NUTS3 de rr
             gdp_n = pd.Series(
                 transfer.dot(nuts3_rr["gdp"].fillna(1.0).values), index=group.index    
             )
 
-
-            #print(gdp_n.describe())
-            #print(gdp_n['2474'])
-            #input('ooh wait....')
 
 
             ########## Devuelve una serie de las subestaciones con la multiplicación área solapada x pop de cada NUTS3 de rr
@@ -380,9 +391,6 @@ def attach_load(n, regions, load, nuts3_shapes, ua_md_gdp, countries, scaling=1.
             )
 
 
-            #print(pop_n.describe())
-            #print(pop_n['2474'])
-            #input('ooh wait....')
 
 
             # relative factors 0.6 and 0.4 have been determined from a linear
@@ -895,7 +903,7 @@ if __name__ == "__main__":
         params.electricity["max_hours"],
         Nyears,
     )
-    ppl = load_powerplants(snakemake.input.powerplants)
+    ppl = load_powerplants(snakemake.input.powerplants, snakemake.params.keep_CCGT)
 
 
     attach_load(

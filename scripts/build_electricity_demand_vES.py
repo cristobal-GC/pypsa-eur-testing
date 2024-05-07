@@ -64,42 +64,41 @@ if __name__ == "__main__":
 
 
 
-    #################### Load dic with communities or provinces, according to the number of columns in df_profiles
-
-    if df_percentages.shape[1] == 16:
-        dic_region = dic_datadis['dic_community_NUTSid']
-    if df_percentages.shape[1] == 48:
-        dic_region = dic_datadis['dic_province_NUTSid']
+##### REMOVE porque los códigos NUTS ya van en el nombre de las columnas
+    #################### Load dic with communities, provinces or country, according to the number of columns in df_percentages
+    #if df_percentages.shape[1] == 16:
+    #    dic_region = dic_datadis['dic_community_NUTSid']
+    #if df_percentages.shape[1] == 48:
+    #    dic_region = dic_datadis['dic_province_NUTSid']
+    #if df_percentages.shape[1] == 1:
+    #    dic_region = dic_datadis['dic_province_NUTSid']
    
 
 
 
     ############### Loop to combine profiles, percentages and annual demand
 
-    ##### Check if dic_regions exists (use the dic name as string, otherwise it does not work)
-    if 'dic_region' in locals():
 
 
-        ##### Loop over rr and ff, multiply each profile by corresponding factor
+    ##### Loop over rr and ff, multiply each profile by corresponding factor
 
-        for rr in dic_region.values():  # rr are the NUTS_ID
-
-
-
-            for ff in df_percentages.index:
+    for rr in df_percentages.columns:  # rr are the NUTS_ID
 
 
-                ### *1e6 because annaul_electricity_demand is provided in TWh, but the time series is in MWh
-                ### /8760 because hourly profiles have been obtained with the mean load, not the sum
-                ### /100 because percentages are over 100
-                factor = (annual_electricity_demand * 1e6 / 8760 )* df_percentages.at[ff,rr] / 100
+        for ff in df_percentages.index:
 
-                df_profiles.loc[:,f'{rr}-{ff}'] = df_profiles[f'{rr}-{ff}'] * factor
+
+            ### *1e6 because annaul_electricity_demand is provided in TWh, but the time series is in MWh
+            ### /8760 because hourly profiles have been obtained with the mean load, not the sum
+            ### /100 because percentages are over 100
+            factor = (annual_electricity_demand * 1e6 / 8760 )* df_percentages.at[ff,rr] / 100
+
+            df_profiles.loc[:,f'{rr}-{ff}'] = df_profiles[f'{rr}-{ff}'] * factor
 
 
 
-            ### Aggregate df_profiles according to rr
-            df_output[rr] = df_profiles.filter(like=rr).sum(axis=1)
+        ### Aggregate df_profiles according to rr
+        df_output[rr] = df_profiles.filter(like=rr).sum(axis=1)
 
 
 
