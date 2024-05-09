@@ -100,7 +100,7 @@ scenario:
   simpl:
   - ''
   ll:
-  - v0.0 ##1.5
+  - v1.1 ##1.5
   clusters:
   - 5
   opts:
@@ -153,10 +153,10 @@ electricity:
   voltages: [220., 300., 380., 500., 750.]
   gaslimit_enable: false
   gaslimit: false
-  co2limit_enable: false
+  co2limit_enable: false ########## estos co2limit y co2base entran por rule "prepare_network"
   co2limit: 7.75e+7
   co2base: 1.487e+9
-  agg_p_nom_limits: data/agg_p_nom_minmax.csv
+  agg_p_nom_limits: data/agg_p_nom_minmax.csv ########## esto entra en solve_network!!! (que no se invoca por sectores)
 
   operational_reserve:
     activate: false
@@ -172,7 +172,7 @@ electricity:
     Generator: [solar, onwind, offwind-ac, offwind-dc, OCGT]
     StorageUnit: [] # battery, H2
     Store: [battery, H2]
-    Link: [] # H2 pipeline
+    Link: [] # H2 pipeline ########## Esto es lo que se comprueba en add_extra_components para añadir la red de H2
 
   powerplants_filter: (DateOut >= 2023 or DateOut != DateOut) and not (Country == 'Germany' and Fueltype == 'Nuclear')
   custom_powerplants: false
@@ -317,7 +317,7 @@ lines:
     380.: "Al/St 240/40 4-bundle 380.0"
     500.: "Al/St 240/40 4-bundle 380.0"
     750.: "Al/St 560/50 4-bundle 750.0"
-  s_max_pu: 0.7
+  s_max_pu: 0.7 ########## Este es el criterio N-1 security margin (ver prepare_network.py)
   s_nom_max: .inf
   max_extension: 20000 #MW
   length_factor: 1.25

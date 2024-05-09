@@ -14,7 +14,8 @@ if config["foresight"] != "perfect":
                 "regions_onshore_elec_s{simpl}_{clusters}.geojson"
             ),
         output:
-            map=resources("maps/power-network-s{simpl}-{clusters}.pdf"),
+            ########## map=resources("maps/power-network-s{simpl}-{clusters}.pdf"), ### Cambio - por _
+            map=resources("maps/power_network_s{simpl}_{clusters}.pdf"),
         threads: 1
         resources:
             mem_mb=4000,
