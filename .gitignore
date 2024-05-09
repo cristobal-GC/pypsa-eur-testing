@@ -30,7 +30,7 @@ doc/_build
 # config/config.yaml
 config/scenarios.yaml
 
-config.yaml
+# config.yaml
 # config/config.yaml
 
 dconf
