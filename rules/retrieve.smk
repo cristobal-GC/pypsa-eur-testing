@@ -200,15 +200,15 @@ if config["enable"]["retrieve"] and config["enable"].get("retrieve_sector_databu
             "../scripts/retrieve_sector_databundle_vES.py"
 
 
-    ################################################## Quizá no hace falta  
-    ########## rule retrieve_eurostat_data:  
-    ##########     output:
-    ##########         directory("data/eurostat/eurostat-energy_balances-april_2023_edition"),
-    ##########     log:
-    ##########         "logs/retrieve_eurostat_data.log",
-    ##########     retries: 2
-    ##########     script:
-    ##########         "../scripts/retrieve_eurostat_data_vES.py"
+    
+    rule retrieve_eurostat_data:  
+        output:
+            directory("data/eurostat/eurostat-energy_balances-april_2023_edition"),
+        log:
+            "logs/retrieve_eurostat_data.log",
+        retries: 2
+        script:
+            "../scripts/retrieve_eurostat_data_vES.py"
 
 
 

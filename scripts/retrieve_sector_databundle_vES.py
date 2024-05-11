@@ -30,7 +30,7 @@ if __name__ == "__main__":
     configure_logging(snakemake)
     set_scenario_config(snakemake)
 
-    url = "https://drive.upm.es/s/vLwTEpjFFfIvlaI/download"
+    url = "https://drive.upm.es/s/8MdoSNGXi9fu2SE/download"
 
     tarball_fn = Path(f"{rootpath}/sector-bundle.tar.gz")
     to_fn = Path(rootpath) / Path(snakemake.output[0]).parent.parent
