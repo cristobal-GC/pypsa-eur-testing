@@ -140,9 +140,7 @@ if config["enable"]["retrieve"] and config["enable"].get(
             validate_checksum(output[0], input[0])
 
 
-if config["enable"]["retrieve"] and config["enable"].get(
-    "retrieve_sector_databundle", True
-):
+if config["enable"]["retrieve"] and config["enable"].get("retrieve_sector_databundle", True) and not config["pypsa_es"].get("retrieve_sector_databundle_ES", False): ########## Añado excepción ibérica, para que si es FALSE haga lo de siempre:
     datafiles = [
         "eea/UNFCCC_v23.csv",
         "switzerland-sfoe/switzerland-new_format.csv",
@@ -174,6 +172,48 @@ if config["enable"]["retrieve"] and config["enable"].get(
         retries: 2
         script:
             "../scripts/retrieve_eurostat_data.py"
+
+
+
+if config["enable"]["retrieve"] and config["enable"].get("retrieve_sector_databundle", True) and config["pypsa_es"].get("retrieve_sector_databundle_ES", False): ########## Añado excepción ibérica, para que si es TRUE descargue una versión light solo con datos de ES:
+    datafiles = [
+        "eea/UNFCCC_v23.csv",
+        ########## "switzerland-sfoe/switzerland-new_format.csv",
+        ########## "nuts/NUTS_RG_10M_2013_4326_LEVL_2.geojson",
+        ########## "myb1-2017-nitro.xls",
+        "Industrial_Database.csv",
+        ########## "emobility/KFZ__count",
+        ########## "emobility/Pkw__count",
+        "h2_salt_caverns_GWh_per_sqkm.geojson",
+    ]
+
+    rule retrieve_sector_databundle:
+        output:
+            protected(expand("data/bundle-sector/{files}", files=datafiles)),
+            protected(directory("data/bundle-sector/jrc-idees-2015")),
+        log:
+            "logs/retrieve_sector_databundle.log",
+        retries: 2
+        conda:
+            "../envs/retrieve.yaml"
+        script:
+            "../scripts/retrieve_sector_databundle_vES.py"
+
+
+    ################################################## Quizá no hace falta  
+    ########## rule retrieve_eurostat_data:  
+    ##########     output:
+    ##########         directory("data/eurostat/eurostat-energy_balances-april_2023_edition"),
+    ##########     log:
+    ##########         "logs/retrieve_eurostat_data.log",
+    ##########     retries: 2
+    ##########     script:
+    ##########         "../scripts/retrieve_eurostat_data_vES.py"
+
+
+
+
+
 
 
 if config["enable"]["retrieve"]:
