@@ -30,7 +30,7 @@ if __name__ == "__main__":
     configure_logging(snakemake)
     set_scenario_config(snakemake)
 
-    url = "https://drive.upm.es/s/8MdoSNGXi9fu2SE/download"
+    url = "https://drive.upm.es/s/mEqsfQ9tojRvjWK/download"
 
     tarball_fn = Path(f"{rootpath}/sector-bundle.tar.gz")
     to_fn = Path(rootpath) / Path(snakemake.output[0]).parent.parent
@@ -39,7 +39,10 @@ if __name__ == "__main__":
     disable_progress = snakemake.config["run"].get("disable_progressbar", False)
     progress_retrieve(url, tarball_fn, disable=disable_progress)
 
-    validate_checksum(tarball_fn, url)
+
+    #################### Elimino checksum, que va contra zenodo
+    ########## validate_checksum(tarball_fn, url)
+
 
     logger.info("Extracting databundle.")
     tarfile.open(tarball_fn).extractall(to_fn)

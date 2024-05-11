@@ -296,8 +296,8 @@ rule build_energy_totals:
     output:
         energy_name=resources("energy_totals.csv"),
         co2_name=resources("co2_totals.csv"),
-        transport_name=resources("transport_data.csv"),
-        district_heat_share=resources("district_heat_share.csv"),
+        ########## transport_name=resources("transport_data.csv"),
+        ########## district_heat_share=resources("district_heat_share.csv"),
     threads: 16
     resources:
         mem_mb=10000,

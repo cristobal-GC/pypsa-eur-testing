@@ -425,9 +425,11 @@ def build_energy_totals(countries, eurostat, swiss, idees):
     fill_values = eurostat.loc[slicer, "Total all products"].groupby(level=[0, 1]).sum()
     df.loc[in_eurostat, "total international navigation"] = fill_values
 
-    # add swiss energy data
+    ########## Don't add swiss
+    ########## # add swiss energy data
+    ########## 
+    ########## df = pd.concat([df.drop("CH", errors="ignore"), swiss]).sort_index()
 
-    df = pd.concat([df.drop("CH", errors="ignore"), swiss]).sort_index()
 
     # get values for missing countries based on Eurostat EnergyBalances
     # divide cooking/space/water according to averages in EU28
@@ -967,7 +969,9 @@ if __name__ == "__main__":
         nprocesses=snakemake.threads,
         disable_progressbar=snakemake.config["run"].get("disable_progressbar", False),
     )
-    swiss = build_swiss()
+    #################### Este no lo necesito
+    ########## swiss = build_swiss()
+    swiss = []
     idees = build_idees(idees_countries)
 
     energy = build_energy_totals(countries, eurostat, swiss, idees)
@@ -978,11 +982,11 @@ if __name__ == "__main__":
 
     energy.to_csv(snakemake.output.energy_name)
 
-    # use rescaled idees data to calculate district heat share
-    district_heat_share = build_district_heat_share(
-        countries, energy.loc[idees_countries]
-    )
-    district_heat_share.to_csv(snakemake.output.district_heat_share)
+    #################### # use rescaled idees data to calculate district heat share
+    #################### district_heat_share = build_district_heat_share(
+    ####################     countries, energy.loc[idees_countries]
+    #################### )
+    #################### district_heat_share.to_csv(snakemake.output.district_heat_share)
 
     base_year_emissions = params["base_emissions_year"]
     emissions_scope = snakemake.params.energy["emissions"]
@@ -992,5 +996,5 @@ if __name__ == "__main__":
     co2 = build_co2_totals(countries, eea_co2, eurostat_co2)
     co2.to_csv(snakemake.output.co2_name)
 
-    transport = build_transport_data(countries, population, idees)
-    transport.to_csv(snakemake.output.transport_name)
+    ########## transport = build_transport_data(countries, population, idees)
+    ########## transport.to_csv(snakemake.output.transport_name)

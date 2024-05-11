@@ -28,7 +28,7 @@ pypsa_es:
   Voronoi_only_where_loads: true ########## build_bus_regions : Voronoy only from buses that will have loads
   keep_CCGT: true
   q2q_transforms:
-    onwind: 'resources/interp_func.pkl'
+    onwind: 'data/bundle_ES/interp_func.pkl'
     offwind-ac: ''
     offwind-dc: ''
     solar: ''

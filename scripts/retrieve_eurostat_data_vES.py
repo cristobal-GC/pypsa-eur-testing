@@ -27,7 +27,7 @@ if __name__ == "__main__":
     set_scenario_config(snakemake)
 
     disable_progress = snakemake.config["run"].get("disable_progressbar", False)
-    url_eurostat = "https://drive.upm.es/s/TOSCv8MBX5WABLv/download"
+    url_eurostat = "https://drive.upm.es/s/EpD8hgKDqjxFCKG/download"
     tarball_fn = Path(f"{rootpath}/data/eurostat/eurostat_2023.zip")
     to_fn = Path(
         f"{rootpath}/data/eurostat/eurostat-energy_balances-april_2023_edition/"
