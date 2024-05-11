@@ -176,7 +176,7 @@ electricity:
 
   powerplants_filter: (DateOut >= 2023 or DateOut != DateOut) and not (Country == 'Germany' and Fueltype == 'Nuclear')
   custom_powerplants: false
-  everywhere_powerplants: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
+  everywhere_powerplants: [nuclear, oil, CCGT, coal, lignite, geothermal, biomass]
 
   conventional_carriers: [nuclear, oil, OCGT, CCGT, coal, lignite, geothermal, biomass]
   renewable_carriers: [solar, onwind, offwind-ac, offwind-dc, hydro]
@@ -364,13 +364,14 @@ pypsa_eur:
   - AC
   Link:
   - DC
-  Generator:
+  Generator: ########## Es aquí donde se fijan qué generators quedan.. (pero parece que lo de everywhere arriba aún funciona)
   - onwind
   - offwind-ac
   - offwind-dc
   - solar
-  - ror
-  - nuclear
+  #- ror
+  #- nuclear
+  - OCGT
   StorageUnit:
   - PHS
   - hydro
@@ -430,18 +431,18 @@ existing_capacities:
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#sector
 sector:
-  transport: true
-  heating: true
-  biomass: true
-  industry: true
-  agriculture: true
+  transport: false   ############################## Enabler at: 'prepare_sector_network.py'
+  heating: false   ############################## Enabler at: 'prepare_sector_network.py'
+  biomass: false   ############################## Enabler at: 'prepare_sector_network.py'
+  industry: false   ############################## Enabler at: 'prepare_sector_network.py'
+  agriculture: false   ############################## Enabler at: 'prepare_sector_network.py'
   district_heating:
     potential: 0.6
     progress:
       2020: 0.0
       2025: 0.15
       2030: 0.3
-      2035: 0.45
+      2035: 0.45-
       2040: 0.6
       2045: 0.8
       2050: 1.0
@@ -556,19 +557,19 @@ sector:
   overdimension_individual_heating: 1.1  #to cover demand peaks bigger than data
   chp: true
   micro_chp: false
-  solar_thermal: true
+  solar_thermal: false
   solar_cf_correction: 0.788457  # =  >>> 1/1.2683
   marginal_cost_storage: 0. #1e-4
-  methanation: true
-  coal_cc: false
-  dac: true
+  methanation: false   ########## Enabler at fun add_storage_and_grids (at: 'prepare_sector_network.py')
+  coal_cc: false   ########## Enabler at fun add_storage_and_grids (at: 'prepare_sector_network.py')
+  dac: false   ############################## Enabler at: 'prepare_sector_network.py'
   co2_vent: false
   central_heat_vent: false
-  allam_cycle: false
-  hydrogen_fuel_cell: true
-  hydrogen_turbine: false
-  SMR: true
-  SMR_cc: true
+  allam_cycle: false   ############################## Enabler at: 'prepare_sector_network.py'
+  hydrogen_fuel_cell: false   ########## Enabler at fun add_storage_and_grids (at: 'prepare_sector_network.py')
+  hydrogen_turbine: false   ########## Enabler at fun add_storage_and_grids (at: 'prepare_sector_network.py')
+  SMR: false   ########## Enabler at fun add_storage_and_grids (at: 'prepare_sector_network.py')
+  SMR_cc: false   ########## Enabler at fun add_storage_and_grids (at: 'prepare_sector_network.py')
   regional_methanol_demand: false
   regional_oil_demand: false
   regional_coal_demand: false
@@ -583,15 +584,15 @@ sector:
   co2_sequestration_cost: 10
   co2_sequestration_lifetime: 50
   co2_spatial: false
-  co2network: false
+  co2network: false   ############################## Enabler at: 'prepare_sector_network.py'
   co2_network_cost_factor: 1
   cc_fraction: 0.9
-  hydrogen_underground_storage: true
-  hydrogen_underground_storage_locations:
-    # - onshore  # more than 50 km from sea
+  hydrogen_underground_storage: true    ########## Enabler at fun add_storage_and_grids (at: 'prepare_sector_network.py')
+  hydrogen_underground_storage_locations:   ########## Here all the possibilities can be activated
+  - onshore  # - onshore  # more than 50 km from sea
   - nearshore    # within 50 km of sea
-    # - offshore
-  ammonia: false
+  - offshore  # - offshore
+  ammonia: false   ############################## Enabler at: 'prepare_sector_network.py'
   min_part_load_fischer_tropsch: 0.7
   min_part_load_methanolisation: 0.3
   min_part_load_methanation: 0.3
@@ -601,8 +602,8 @@ sector:
   use_methanation_waste_heat: true
   use_fuel_cell_waste_heat: true
   use_electrolysis_waste_heat: true
-  electricity_transmission_grid: true
-  electricity_distribution_grid: true
+  electricity_transmission_grid: true   ############################## DISABLER at: 'prepare_sector_network.py': if false, removes the existing one
+  electricity_distribution_grid: false   ############################## Enabler at: 'prepare_sector_network.py'
   electricity_distribution_grid_cost_factor: 1.0
   electricity_grid_connection: true
   transmission_efficiency:
@@ -615,12 +616,13 @@ sector:
     gas pipeline:
       efficiency_per_1000km: 1 #0.977
       compression_per_1000km: 0.01
-  H2_network: true
-  gas_network: false
-  H2_retrofit: false
+  H2_network: true      ########## Enabler at fun add_storage_and_grids (at: 'prepare_sector_network.py')
+                        ############################## DISABLER at: 'prepare_sector_network.py': if false, removes the existing one
+  gas_network: false   ########## Enabler at fun add_storage_and_grids (at: 'prepare_sector_network.py')
+  H2_retrofit: false   ########## Enabler at fun add_storage_and_grids (at: 'prepare_sector_network.py')
   H2_retrofit_capacity_per_CH4: 0.6
   gas_network_connectivity_upgrade: 1
-  gas_distribution_grid: true
+  gas_distribution_grid: false
   gas_distribution_grid_cost_factor: 1.0
   biomass_spatial: false
   biomass_transport: false

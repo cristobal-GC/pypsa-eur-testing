@@ -875,7 +875,7 @@ rule prepare_sector_network:
         foresight=config_provider("foresight"),
         costs=config_provider("costs"),
         sector=config_provider("sector"),
-        industry=config_provider("industry"),
+        ########## industry=config_provider("industry"),
         lines=config_provider("lines"),
         pypsa_eur=config_provider("pypsa_eur"),
         length_factor=config_provider("lines", "length_factor"),
@@ -886,8 +886,8 @@ rule prepare_sector_network:
         RDIR=RDIR,
     input:
         unpack(input_profile_offwind),
-        **rules.cluster_gas_network.output,
-        **rules.build_gas_input_locations.output,
+        ########## **rules.cluster_gas_network.output,
+        ########## **rules.build_gas_input_locations.output,
         retro_cost=lambda w: (
             resources("retro_cost_elec_s{simpl}_{clusters}.csv")
             if config_provider("sector", "retrofitting", "retro_endogen")(w)
@@ -913,29 +913,31 @@ rule prepare_sector_network:
         ),
         network=resources("networks/elec_s{simpl}_{clusters}_ec_l{ll}_{opts}.nc"),
         eurostat="data/eurostat/eurostat-energy_balances-april_2023_edition",
-        pop_weighted_energy_totals=resources(
-            "pop_weighted_energy_totals_s{simpl}_{clusters}.csv"
-        ),
-        pop_weighted_heat_totals=resources(
-            "pop_weighted_heat_totals_s{simpl}_{clusters}.csv"
-        ),
-        shipping_demand=resources("shipping_demand_s{simpl}_{clusters}.csv"),
-        transport_demand=resources("transport_demand_s{simpl}_{clusters}.csv"),
-        transport_data=resources("transport_data_s{simpl}_{clusters}.csv"),
-        avail_profile=resources("avail_profile_s{simpl}_{clusters}.csv"),
-        dsm_profile=resources("dsm_profile_s{simpl}_{clusters}.csv"),
+        ############# Este archivo se llama en el script siempre, lo he cancelado porque no es necesario
+        ########## pop_weighted_energy_totals=resources(                               
+        ##########     "pop_weighted_energy_totals_s{simpl}_{clusters}.csv"
+        ########## ),
+        ############# Este archivo se llama en el script siempre, lo he cancelado porque no es necesario
+        ########## pop_weighted_heat_totals=resources(
+        ##########     "pop_weighted_heat_totals_s{simpl}_{clusters}.csv"
+        ########## ),
+        ########## shipping_demand=resources("shipping_demand_s{simpl}_{clusters}.csv"),
+        ########## transport_demand=resources("transport_demand_s{simpl}_{clusters}.csv"),
+        ########## transport_data=resources("transport_data_s{simpl}_{clusters}.csv"),
+        ########## avail_profile=resources("avail_profile_s{simpl}_{clusters}.csv"),
+        ########## dsm_profile=resources("dsm_profile_s{simpl}_{clusters}.csv"),
         co2_totals_name=resources("co2_totals.csv"),
         co2="data/bundle-sector/eea/UNFCCC_v23.csv",
-        biomass_potentials=lambda w: (
-            resources(
-                "biomass_potentials_s{simpl}_{clusters}_"
-                + "{}.csv".format(config_provider("biomass", "year")(w))
-            )
-            if config_provider("foresight")(w) == "overnight"
-            else resources(
-                "biomass_potentials_s{simpl}_{clusters}_{planning_horizons}.csv"
-            )
-        ),
+        ########## biomass_potentials=lambda w: (
+        ##########     resources(
+        ##########         "biomass_potentials_s{simpl}_{clusters}_"
+        ##########         + "{}.csv".format(config_provider("biomass", "year")(w))
+        ##########     )
+        ##########     if config_provider("foresight")(w) == "overnight"
+        ##########     else resources(
+        ##########         "biomass_potentials_s{simpl}_{clusters}_{planning_horizons}.csv"
+        ##########     )
+        ########## ),
         costs=lambda w: (
             resources("costs_{}.csv".format(config_provider("costs", "year")(w)))
             if config_provider("foresight")(w) == "overnight"
@@ -946,27 +948,27 @@ rule prepare_sector_network:
         busmap=resources("busmap_elec_s{simpl}_{clusters}.csv"),
         clustered_pop_layout=resources("pop_layout_elec_s{simpl}_{clusters}.csv"),
         simplified_pop_layout=resources("pop_layout_elec_s{simpl}.csv"),
-        industrial_demand=resources(
-            "industrial_energy_demand_elec_s{simpl}_{clusters}_{planning_horizons}.csv"
-        ),
-        hourly_heat_demand_total=resources(
-            "hourly_heat_demand_total_elec_s{simpl}_{clusters}.nc"
-        ),
-        district_heat_share=resources(
-            "district_heat_share_elec_s{simpl}_{clusters}_{planning_horizons}.csv"
-        ),
-        temp_soil_total=resources("temp_soil_total_elec_s{simpl}_{clusters}.nc"),
-        temp_soil_rural=resources("temp_soil_rural_elec_s{simpl}_{clusters}.nc"),
-        temp_soil_urban=resources("temp_soil_urban_elec_s{simpl}_{clusters}.nc"),
-        temp_air_total=resources("temp_air_total_elec_s{simpl}_{clusters}.nc"),
-        temp_air_rural=resources("temp_air_rural_elec_s{simpl}_{clusters}.nc"),
-        temp_air_urban=resources("temp_air_urban_elec_s{simpl}_{clusters}.nc"),
-        cop_soil_total=resources("cop_soil_total_elec_s{simpl}_{clusters}.nc"),
-        cop_soil_rural=resources("cop_soil_rural_elec_s{simpl}_{clusters}.nc"),
-        cop_soil_urban=resources("cop_soil_urban_elec_s{simpl}_{clusters}.nc"),
-        cop_air_total=resources("cop_air_total_elec_s{simpl}_{clusters}.nc"),
-        cop_air_rural=resources("cop_air_rural_elec_s{simpl}_{clusters}.nc"),
-        cop_air_urban=resources("cop_air_urban_elec_s{simpl}_{clusters}.nc"),
+        ########## industrial_demand=resources(
+        ##########     "industrial_energy_demand_elec_s{simpl}_{clusters}_{planning_horizons}.csv"
+        ########## ),
+        ########## hourly_heat_demand_total=resources(
+        ##########     "hourly_heat_demand_total_elec_s{simpl}_{clusters}.nc"
+        ########## ),
+        ########## district_heat_share=resources(
+        ##########     "district_heat_share_elec_s{simpl}_{clusters}_{planning_horizons}.csv"
+        ########## ),
+        ########## temp_soil_total=resources("temp_soil_total_elec_s{simpl}_{clusters}.nc"),
+        ########## temp_soil_rural=resources("temp_soil_rural_elec_s{simpl}_{clusters}.nc"),
+        ########## temp_soil_urban=resources("temp_soil_urban_elec_s{simpl}_{clusters}.nc"),
+        ########## temp_air_total=resources("temp_air_total_elec_s{simpl}_{clusters}.nc"),
+        ########## temp_air_rural=resources("temp_air_rural_elec_s{simpl}_{clusters}.nc"),
+        ########## temp_air_urban=resources("temp_air_urban_elec_s{simpl}_{clusters}.nc"),
+        ########## cop_soil_total=resources("cop_soil_total_elec_s{simpl}_{clusters}.nc"),
+        ########## cop_soil_rural=resources("cop_soil_rural_elec_s{simpl}_{clusters}.nc"),
+        ########## cop_soil_urban=resources("cop_soil_urban_elec_s{simpl}_{clusters}.nc"),
+        ########## cop_air_total=resources("cop_air_total_elec_s{simpl}_{clusters}.nc"),
+        ########## cop_air_rural=resources("cop_air_rural_elec_s{simpl}_{clusters}.nc"),
+        ########## cop_air_urban=resources("cop_air_urban_elec_s{simpl}_{clusters}.nc"),
         solar_thermal_total=lambda w: (
             resources("solar_thermal_total_elec_s{simpl}_{clusters}.nc")
             if config_provider("sector", "solar_thermal")(w)

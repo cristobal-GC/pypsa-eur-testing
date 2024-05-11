@@ -358,7 +358,7 @@ def attach_load(n, regions, load, nuts3_shapes, ua_md_gdp, countries, scaling=1.
 
 
 
-        for rr_ID in opsd_load.columns:  ##### rr is the NUTS ID
+        for rr_ID in opsd_load.columns:  ##### rr_ID is the NUTS ID
 
             load = opsd_load[rr_ID]
 
@@ -395,7 +395,17 @@ def attach_load(n, regions, load, nuts3_shapes, ua_md_gdp, countries, scaling=1.
 
             # relative factors 0.6 and 0.4 have been determined from a linear
             # regression on the country to continent load data
-            factors = normed(0.6 * normed(gdp_n) + 0.4 * normed(pop_n))   ########## normed normaliza un vector entre 0 y 1
+            ########## normed makes the elements of a vector to sum 1
+
+            print(rr_ID)
+
+            if rr_ID[:2] == 'ES':
+                factors = normed(0.18 * normed(gdp_n) + 0.82 * normed(pop_n))   
+            else:
+                factors = normed(0.6 * normed(gdp_n) + 0.4 * normed(pop_n))   
+
+
+
             #if cntry in ["UA", "MD"]:
             #    # overwrite factor because nuts3 provides no data for UA+MD
             #    factors = normed(ua_md_gdp.loc[group.index, "GDP_PPP"].squeeze())

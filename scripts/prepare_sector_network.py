@@ -3582,6 +3582,8 @@ if __name__ == "__main__":
             planning_horizons="2030",
         )
 
+
+
     configure_logging(snakemake)
     set_scenario_config(snakemake)
     update_config_from_wildcards(snakemake.config, snakemake.wildcards)
@@ -3602,13 +3604,14 @@ if __name__ == "__main__":
         nyears,
     )
 
-    pop_weighted_energy_totals = (
-        pd.read_csv(snakemake.input.pop_weighted_energy_totals, index_col=0) * nyears
-    )
-    pop_weighted_heat_totals = (
-        pd.read_csv(snakemake.input.pop_weighted_heat_totals, index_col=0) * nyears
-    )
-    pop_weighted_energy_totals.update(pop_weighted_heat_totals)
+    ########## Esto lo quito como parte de la simlificación al no usar realmente los sectores
+    # pop_weighted_energy_totals = (
+    #     pd.read_csv(snakemake.input.pop_weighted_energy_totals, index_col=0) * nyears
+    # )
+    # pop_weighted_heat_totals = (
+    #     pd.read_csv(snakemake.input.pop_weighted_heat_totals, index_col=0) * nyears
+    # )
+    # pop_weighted_energy_totals.update(pop_weighted_heat_totals)
 
     patch_electricity_network(n)
 
