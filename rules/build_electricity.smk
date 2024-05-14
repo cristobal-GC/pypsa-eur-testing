@@ -480,6 +480,7 @@ rule add_electricity:
         costs=config_provider("costs"),
         drop_leap_day=config_provider("enable", "drop_leap_day"),
         keep_CCGT=config_provider("pypsa_es", "keep_CCGT"), ########## add token to keep CCGT in Spain
+        update_weights=config_provider("pypsa_es","electricity_demand","update_weights"), ########## to use proper 'gdp' and 'pop' weights
     input:
         unpack(input_profile_tech),
         unpack(input_conventional),

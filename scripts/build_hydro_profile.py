@@ -123,7 +123,6 @@ def get_eia_annual_hydro_generation(fn, countries, capacities=False):
     # Note that 2022 is handled as a number. If '2022' as a string, actual 2022 is taken as missing year later in the script, and an error arises
     if 2022 not in df.columns:
         df[2022] = float('nan')
-        print(f'########## pypsa-es comment: keys are {df.index}')
         if not capacities:
             df.loc['ES', 2022] = 17.86
             print(f'########## INFO[pypsa-es]: hydro GENERATION for was added for 2022: {df.loc["ES", 2022]}')

@@ -316,7 +316,7 @@ def shapes_to_shapes(orig, dest):
 # - Use a specific load time series for each region (community NUTS2 or province NUTS3), rather than using the load at national level.
 # - The regions are named through the NUTS ID, see columns in 'resources/electricity_demand.csv' (outputs from build_electricity_demand_vES.py)
 # - The time series added to a specific substation within a specific region (community/province), is weighted according to shared area (the small region associated to the substation is employed), gdp and and population of the corresponding NUTS3 where the substation is located (this is similar to pypsa-eur)
-def attach_load(n, regions, load, nuts3_shapes, ua_md_gdp, countries, scaling=1.0):
+def attach_load(n, regions, load, nuts3_shapes, ua_md_gdp, countries, update_weights, scaling=1.0):
 
     ########## Devuelve, de los 1109 buses que hay en la península, los índices de los 522 que son True en "substation_lv
     substation_lv_i = n.buses.index[n.buses["substation_lv"]]
@@ -399,7 +399,7 @@ def attach_load(n, regions, load, nuts3_shapes, ua_md_gdp, countries, scaling=1.
 
             print(rr_ID)
 
-            if rr_ID[:2] == 'ES':
+            if update_weights:
                 factors = normed(0.18 * normed(gdp_n) + 0.82 * normed(pop_n))   
             else:
                 factors = normed(0.6 * normed(gdp_n) + 0.4 * normed(pop_n))   
@@ -923,6 +923,7 @@ if __name__ == "__main__":
         snakemake.input.nuts3_shapes,
         snakemake.input.ua_md_gdp,
         params.countries,
+        params.update_weights,
         params.scaling_factor,
     )
 

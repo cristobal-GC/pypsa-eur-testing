@@ -23,10 +23,10 @@ tutorial: false
 
 
 pypsa_es:
-  ES_cutout: true ########## retrieve.smk : rule retrieve_cutout: retrieves "iberia-2022-era5.nc" instead of pypsa-eur cutouts
-  retrieve_sector_databundle_ES: true ########## To download a light version with ES data only
-  Voronoi_only_where_loads: true ########## build_bus_regions : Voronoy only from buses that will have loads
-  keep_CCGT: true
+  ES_cutout: true ########## To retrieve "iberia-2022-era5.nc" instead of standard pypsa-eur cutout for 2013
+  retrieve_sector_databundle_ES: true ########## To download a light version of sector_databundle, with ES data only
+  Voronoi_only_where_loads: true ########## [build_bus_regions] To avoid having Voronoy cells in 'joint' buses that will not have loads
+  keep_CCGT: true ########## To avoid CCGT being replaced by OCGT 
   q2q_transforms:
     onwind: 'data/bundle_ES/interp_func.pkl'
     offwind-ac: ''
@@ -36,11 +36,13 @@ pypsa_es:
     customised: true ########## set to 'True' to provide customised demand for ES. 
                      ##########        'False' to follow standard pypsa-es procedure 
                      ##########                (including 'retrieve_electricity_demand', which is somehow heavy..)
+    update_weights: true ########## To use weights 'gdp' and 'pop' obtained for ES, 0.18 and 0.82 (rather than 0.6 and 0.4)
+                         # used in rule: add_electricity, function: attach_load
     annual_value: 230 ########## in TWh
     profiles: data/bundle_ES/datadis/electricity_demand_profiles_country_by_economicSector_2022.csv ########## Path to file with profiles
     percentages: data/bundle_ES/datadis/electricity_demand_percentages_country_by_economicSector_2022.csv ########## Path to file with percentages
   generator_capacities:
-    update_with_REE: true
+    update_with_REE: true ########## To scale generation capacity at each province, according to data provided below
     carriers_to_update: 
       onwind: 'data/bundle_ES/ESIOS/ESIOS_onwind_capacity_2022.csv'
       solar: 'data/bundle_ES/ESIOS/ESIOS_solar_capacity_2022.csv'
