@@ -362,19 +362,18 @@ load:
 # some technologies are removed because they are implemented differently
 # (e.g. battery or H2 storage) or have different year-dependent costs
 # in PyPSA-Eur-Sec
-pypsa_eur:
+pypsa_eur:   ########## Aquí se fijan qué elementos se quedan, ver function "remove_elec_base_techs", script "prepare_sector_network.py"
   Bus:
   - AC
   Link:
   - DC
-  Generator: ########## Es aquí donde se fijan qué generators quedan.. (pero parece que lo de everywhere arriba aún funciona)
+  Generator:   ########## Aquí no están OCGT ni CCGT porque se gestionan mediante links
   - onwind
   - offwind-ac
   - offwind-dc
   - solar
-  #- ror
-  #- nuclear
-  - OCGT
+  - ror
+  - nuclear
   StorageUnit:
   - PHS
   - hydro
@@ -630,8 +629,9 @@ sector:
   biomass_spatial: false
   biomass_transport: false
   biogas_upgrading_cc: false
-  conventional_generation:
+  conventional_generation: ########## Aquí es donde se introducen links, function "add_generation", script "prepare_sector_network.py"
     OCGT: gas
+    CCGT: gas   ########## Incluyo CCGT
   biomass_to_liquid: false
   biosng: false
   limit_max_growth:
