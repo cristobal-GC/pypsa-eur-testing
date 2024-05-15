@@ -48,7 +48,10 @@ pypsa_es:
       solar: 'data/bundle_ES/ESIOS/ESIOS_solar_capacity_2022.csv'
       nuclear: 'data/bundle_ES/ESIOS/ESIOS_nuclear_capacity_2022.csv'
       CCGT: 'data/bundle_ES/ESIOS/ESIOS_CCGT_capacity_2022.csv'
-
+  costs_ES:
+    costs_update: true
+    costs_update_file: 'data/bundle_ES/costs_updates.csv'
+    
 
 
 
