@@ -884,6 +884,8 @@ rule prepare_sector_network:
         adjustments=config_provider("adjustments", "sector"),
         emissions_scope=config_provider("energy", "emissions"),
         RDIR=RDIR,
+        include_ic_ES=config_provider("pypsa_es","interconnections", "include_ic_ES"),
+        ic_ES_file=config_provider("pypsa_es","interconnections", "ic_ES_file"),
     input:
         unpack(input_profile_offwind),
         ########## **rules.cluster_gas_network.output,

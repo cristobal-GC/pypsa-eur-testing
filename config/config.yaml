@@ -51,6 +51,9 @@ pypsa_es:
   costs_ES:
     costs_update: true
     costs_update_file: 'data/bundle_ES/costs_updates.csv'
+  interconnections:
+    include_ic_ES: true
+    ic_ES_file: 'data/bundle_ES/interconnections/interconnections.yaml'
     
 
 
@@ -757,7 +760,7 @@ costs:
   # capital_cost:
   #   onwind: 500
   marginal_cost:
-    solar: 0.01
+    solar: 100.01
     onwind: 0.015
     offwind: 0.015
     hydro: 0.

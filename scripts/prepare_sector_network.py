@@ -36,6 +36,12 @@ from pypsa.geo import haversine_pts
 from pypsa.io import import_components_from_dataframe
 from scipy.stats import beta
 
+
+########## ES
+# import yaml to read interconnections data
+import yaml
+
+
 spatial = SimpleNamespace()
 logger = logging.getLogger(__name__)
 
@@ -3725,6 +3731,65 @@ if __name__ == "__main__":
 
     if options.get("cluster_heat_buses", False) and not first_year_myopic:
         cluster_heat_buses(n)
+
+    
+
+    ######################################## Este parece un buen sitio para incluir modificaciones a la prenetwork
+
+    #################### Add interconnections
+    if snakemake.params.include_ic_ES:
+
+        file = snakemake.params.ic_ES_file
+
+        with open(file, 'r') as archivo:
+            ic_dic = yaml.safe_load(archivo)
+
+
+        for kk, vv in ic_dic.items():
+
+            print(f'########## pypsa-es [prepare_sector_network.py]: Adding elements of interconnection {kk}')
+
+            ########## Identify the closest bus:
+            ### Select candidates: los buses peninsulares con AC (para no repetir)         
+            candidates = n.buses.loc[ (n.buses.index.str.contains('ES0')) & (n.buses['carrier']=='AC'), ['x', 'y']]
+            print(f'candidates: {candidates}')
+            ### Compute distances
+            x0 = ic_dic[kk]['bus_params']['x']
+            y0 = ic_dic[kk]['bus_params']['y']
+            distances = np.sqrt((candidates['x'] - x0)**2 + (candidates['y'] - y0)**2)
+            print(f'distances: {distances}')
+            ### Find closes bus, and assign it to the correct side of the link
+            closest_bus_index = distances.idxmin()
+            print(f'closest_bus_index: {closest_bus_index}')
+
+
+
+
+            ########## Add bus
+            n.add('Bus', ic_dic[kk]['bus_name'], **ic_dic[kk]['bus_params'])
+
+			########## Add links
+            n.add('Link', ic_dic[kk]['link_export_name'], **ic_dic[kk]['link_export_params'])
+            n.add('Link', ic_dic[kk]['link_import_name'], **ic_dic[kk]['link_import_params'])
+
+			########## Add generator
+            n.add('Generator', ic_dic[kk]['generator_name'], **ic_dic[kk]['generator_params'])
+ 
+			########## Add load
+            n_pre.add('Load', ic_dic['ES_FR_1']['load_name'], **ic_dic['ES_FR_1']['load_params'])
+
+			########## Add load_t
+            n.generators_t['marginal_cost'][ic_dic[kk]['generator_name']] = np.linspace(0,200,8760)   ### linearly increasing costs, from 0 to 200
+
+
+
+
+
+
+
+
+    input('oeee...')
+
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
 
