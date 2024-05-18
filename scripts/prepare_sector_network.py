@@ -3749,46 +3749,61 @@ if __name__ == "__main__":
 
             print(f'########## pypsa-es [prepare_sector_network.py]: Adding elements of interconnection {kk}')
 
+
             ########## Identify the closest bus:
             ### Select candidates: los buses peninsulares con AC (para no repetir)         
             candidates = n.buses.loc[ (n.buses.index.str.contains('ES0')) & (n.buses['carrier']=='AC'), ['x', 'y']]
-            print(f'candidates: {candidates}')
+            # print(f'candidates: {candidates}')
             ### Compute distances
             x0 = ic_dic[kk]['bus_params']['x']
             y0 = ic_dic[kk]['bus_params']['y']
             distances = np.sqrt((candidates['x'] - x0)**2 + (candidates['y'] - y0)**2)
-            print(f'distances: {distances}')
+            # print(f'distances: {distances}')
             ### Find closes bus, and assign it to the correct side of the link
             closest_bus_index = distances.idxmin()
-            print(f'closest_bus_index: {closest_bus_index}')
-
+            # print(f'closest_bus_index: {closest_bus_index}')
+            ic_dic[kk]['link_params']['bus0'] = closest_bus_index
+            ic_dic[kk]['link_params_rev']['bus1'] = closest_bus_index
 
 
 
             ########## Add bus
             n.add('Bus', ic_dic[kk]['bus_name'], **ic_dic[kk]['bus_params'])
+            n.buses.loc[ic_dic[kk]['bus_name'], 'country'] = 'ES'
+            n.buses.loc[ic_dic[kk]['bus_name'], 'location'] = 'ES FR0'
 
 			########## Add links
-            n.add('Link', ic_dic[kk]['link_export_name'], **ic_dic[kk]['link_export_params'])
-            n.add('Link', ic_dic[kk]['link_import_name'], **ic_dic[kk]['link_import_params'])
+            n.add('Link', ic_dic[kk]['link_name'], **ic_dic[kk]['link_params'])
+            ##### adding 'reversed' feature, parece que no se puede incluir con add porque no es característica original?
+
+#            n.links.loc[ic_dic[kk]['link_name'], 'reversed'] = False  ##### esta condición impide que se guarde con to_netcdf
+            n.links.loc[ic_dic[kk]['link_name'], 'underground'] = False
+            n.links.loc[ic_dic[kk]['link_name'], 'under_construction'] = False
+            n.links.loc[ic_dic[kk]['link_name'], 'underwater_fraction'] = 0
+
+
+			########## Add links rev?
+            n.add('Link', ic_dic[kk]['link_name_rev'], **ic_dic[kk]['link_params_rev'])
+
+
 
 			########## Add generator
             n.add('Generator', ic_dic[kk]['generator_name'], **ic_dic[kk]['generator_params'])
+
+            ########## Add generator_t: marginal cost
+            ### linearly increasing costs, from 0 to 200
+            N = len(n.generators_t['marginal_cost'])
+            n.generators_t['marginal_cost'][ic_dic[kk]['generator_name']] = np.linspace(0,200,N)
  
 			########## Add load
-            n_pre.add('Load', ic_dic['ES_FR_1']['load_name'], **ic_dic['ES_FR_1']['load_params'])
+            n.add('Load', ic_dic[kk]['load_name'], **ic_dic[kk]['load_params'])
 
 			########## Add load_t
-            n.generators_t['marginal_cost'][ic_dic[kk]['generator_name']] = np.linspace(0,200,8760)   ### linearly increasing costs, from 0 to 200
+            ### Large enough to not be fully served by the interconnection
+            n.loads_t['p_set'][ic_dic[kk]['load_name']] = 1200
 
 
 
-
-
-
-
-
-    input('oeee...')
 
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
@@ -3796,4 +3811,7 @@ if __name__ == "__main__":
     sanitize_carriers(n, snakemake.config)
     sanitize_locations(n)
 
+    
     n.export_to_netcdf(snakemake.output[0])
+
+

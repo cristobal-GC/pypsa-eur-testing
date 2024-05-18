@@ -689,15 +689,36 @@ def add_battery_constraints(n):
 
 
 def add_lossy_bidirectional_link_constraints(n):
+
     if not n.links.p_nom_extendable.any() or "reversed" not in n.links.columns:
         return
 
     n.links["reversed"] = n.links.reversed.fillna(0).astype(bool)
+
+    print(n.links["reversed"])
+    input('point 3')
+
+
+    #################### Patch para que la inclusión de las interconexiones no dé problemas con el reversed
+
+    ##### Aquí se identifica AC como carrier con 'reversed'
     carriers = n.links.loc[n.links.reversed, "carrier"].unique()  # noqa: F841
 
+
+    ##### Aquí se coge la parte 'no reversed' de los carriers identificados.. pues se incluye la ic
     forward_i = n.links.query(
         "carrier in @carriers and ~reversed and p_nom_extendable"
     ).index
+
+    ##### Así que eliminamos las que tienen 'ic' en el índice
+    forward_i = forward_i[~forward_i.str.contains('ic')]
+
+
+    print(forward_i)
+    input('point 5')
+
+
+
 
     def get_backward_i(forward_i):
         return pd.Index(
@@ -712,6 +733,11 @@ def add_lossy_bidirectional_link_constraints(n):
         )
 
     backward_i = get_backward_i(forward_i)
+
+    print(backward_i)
+    input('point 6')
+
+
 
     lhs = n.model["Link-p_nom"].loc[backward_i]
     rhs = n.model["Link-p_nom"].loc[forward_i]
@@ -955,6 +981,9 @@ if __name__ == "__main__":
         planning_horizons=snakemake.params.planning_horizons,
         co2_sequestration_potential=snakemake.params["co2_sequestration_potential"],
     )
+
+
+    input('Empieza solve_network..')
 
     with memory_logger(
         filename=getattr(snakemake.log, "memory", None), interval=30.0
