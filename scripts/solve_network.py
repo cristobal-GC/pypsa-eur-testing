@@ -695,8 +695,12 @@ def add_lossy_bidirectional_link_constraints(n):
 
     n.links["reversed"] = n.links.reversed.fillna(0).astype(bool)
 
-    print(n.links["reversed"])
-    input('point 3')
+
+
+
+
+    ##### print(n.links["reversed"])
+    ##### input('point 3')
 
 
     #################### Patch para que la inclusión de las interconexiones no dé problemas con el reversed
@@ -710,12 +714,11 @@ def add_lossy_bidirectional_link_constraints(n):
         "carrier in @carriers and ~reversed and p_nom_extendable"
     ).index
 
-    ##### Así que eliminamos las que tienen 'ic' en el índice
-    forward_i = forward_i[~forward_i.str.contains('ic')]
+    ##### Así que eliminamos las que tienen 'ic' en el índice  ########## YA NO, porque dejamos que se haga reversed
+    ##### forward_i = forward_i[~forward_i.str.contains('ic')]
 
-
-    print(forward_i)
-    input('point 5')
+    ##### print(forward_i)
+    ##### input('point 5')
 
 
 

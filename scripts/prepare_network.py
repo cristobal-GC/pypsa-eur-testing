@@ -159,7 +159,20 @@ def set_line_s_max_pu(n, s_max_pu=0.7):
 
 
 def set_transmission_limit(n, ll_type, factor, costs, Nyears=1):
+
+    ##### looking for ic capital costs = na
+    print(ll_type)
+    print(factor)
+    input('inner check 1')
+
     links_dc_b = n.links.carrier == "DC" if not n.links.empty else pd.Series()
+
+
+    ##### looking for ic capital costs = na
+    print(links_dc_b)
+    input('inner check 2')
+
+
 
     _lines_s_nom = (
         np.sqrt(3)
@@ -175,7 +188,19 @@ def set_transmission_limit(n, ll_type, factor, costs, Nyears=1):
         + n.links.loc[links_dc_b, "p_nom"] @ n.links.loc[links_dc_b, col]
     )
 
+
+    ##### looking for ic capital costs = na
+    print(n.links[['capital_cost', 'underwater_fraction', 'underground']])
+    input('inner check 3')
+
+
     update_transmission_costs(n, costs)
+
+
+    ##### looking for ic capital costs = na
+    print(n.links[['capital_cost', 'underwater_fraction', 'underground']])
+    input('inner check 4')
+
 
     if factor == "opt" or float(factor) > 1.0:
         n.lines["s_nom_min"] = lines_s_nom
@@ -318,6 +343,11 @@ if __name__ == "__main__":
     update_config_from_wildcards(snakemake.config, snakemake.wildcards)
 
     n = pypsa.Network(snakemake.input[0])
+
+    print(n.links[['capital_cost', 'underwater_fraction', 'underground']])
+    input('above is the capital costs of link - checkpoint 1')
+
+
     Nyears = n.snapshot_weightings.objective.sum() / 8760.0
     costs = load_costs(
         snakemake.input.tech_costs,
@@ -359,8 +389,22 @@ if __name__ == "__main__":
             n, dict(co2=snakemake.params.costs["emission_prices"]["co2"])
         )
 
+
+
+    print(n.links[['capital_cost', 'underwater_fraction', 'underground']])
+    input('above is the capital costs of link - checkpoint 2')
+
+
+
+    ########## Es en este paso en el que se actualizan capital costs de links, y el de la ic se pone como nan
+
     ll_type, factor = snakemake.wildcards.ll[0], snakemake.wildcards.ll[1:]
     set_transmission_limit(n, ll_type, factor, costs, Nyears)
+
+
+    print(n.links[['capital_cost', 'underwater_fraction', 'underground']])
+    input('above is the capital costs of link - checkpoint 2.5')
+
 
     set_line_nom_max(
         n,
@@ -376,3 +420,6 @@ if __name__ == "__main__":
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output[0])
+
+    print(n.links[['capital_cost', 'underwater_fraction', 'underground']])
+    input('above is the capital costs of link - checkpoint 3')

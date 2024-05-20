@@ -58,6 +58,13 @@ import pypsa
 from _helpers import configure_logging, set_scenario_config
 from add_electricity import load_costs, sanitize_carriers, sanitize_locations
 
+
+########## ES
+# import yaml to read interconnections data
+import yaml
+
+
+
 idx = pd.IndexSlice
 
 logger = logging.getLogger(__name__)
@@ -224,6 +231,79 @@ def attach_hydrogen_pipelines(n, costs, extendable_carriers):
     )
 
 
+
+
+
+################################################## ES: function to add interconnections
+def attach_interconnections_ES(n, ic_dic):
+
+    for kk, vv in ic_dic.items():
+
+        print(f'########## pypsa-es [add_extra_components.py]: Adding interconnection {kk}')
+
+
+        ########## Identify the closest bus:
+        ### Select candidates: los buses peninsulares con AC (para no repetir)         
+        candidates = n.buses.loc[ (n.buses.index.str.contains('ES0')) & (n.buses['carrier']=='AC'), ['x', 'y']]
+        # print(f'candidates: {candidates}')
+        ### Compute distances
+        x0 = ic_dic[kk]['bus_params']['x']
+        y0 = ic_dic[kk]['bus_params']['y']
+        distances = np.sqrt((candidates['x'] - x0)**2 + (candidates['y'] - y0)**2)
+        # print(f'distances: {distances}')
+        ### Find closes bus, and assign it to the correct side of the link
+        closest_bus_index = distances.idxmin()
+        # print(f'closest_bus_index: {closest_bus_index}')
+        ic_dic[kk]['link_params']['bus0'] = closest_bus_index
+        #ic_dic[kk]['link_params_rev']['bus1'] = closest_bus_index
+
+
+        ########## Add bus
+        n.add('Bus', ic_dic[kk]['bus_name'], **ic_dic[kk]['bus_params'])
+        n.buses.loc[ic_dic[kk]['bus_name'], 'location'] = ic_dic[kk]['bus_name']
+        #n.buses.loc[ic_dic[kk]['bus_name'], 'country'] = 'ES'
+        
+
+        ########## Add links
+        n.add('Link', ic_dic[kk]['link_name'], **ic_dic[kk]['link_params'])
+
+        #n.links.loc[ic_dic[kk]['link_name'], 'underground'] = False
+
+        ##### looking for ic capital costs = na
+        print(n.links[['capital_cost', 'underwater_fraction', 'underground']])
+        input('inner check A')
+
+        n.links.loc[ic_dic[kk]['link_name'], 'underwater_fraction'] = 0
+
+
+        ##### looking for ic capital costs = na
+        print(n.links[['capital_cost', 'underwater_fraction', 'underground']])
+        input('inner check B')
+
+
+
+        ########## Add generator
+        n.add('Generator', ic_dic[kk]['generator_name'], **ic_dic[kk]['generator_params'])
+
+        ########## Add generator_t: marginal cost
+        ### linearly increasing costs, from 0 to 200
+        N = len(n.generators_t['marginal_cost'])
+        n.generators_t['marginal_cost'][ic_dic[kk]['generator_name']] = np.linspace(0,200,N)
+
+        ########## Add load
+        n.add('Load', ic_dic[kk]['load_name'], **ic_dic[kk]['load_params'])
+
+        ########## Add load_t
+        ### Large enough to not be fully served by the interconnection
+        n.loads_t['p_set'][ic_dic[kk]['load_name']] = 1200
+
+
+
+        
+
+
+
+
 if __name__ == "__main__":
     if "snakemake" not in globals():
         from _helpers import mock_snakemake
@@ -245,8 +325,25 @@ if __name__ == "__main__":
     attach_stores(n, costs, extendable_carriers)
     attach_hydrogen_pipelines(n, costs, extendable_carriers)
 
+
+    ######################################## Este parece un buen sitio para incluir las interconexiones
+    if snakemake.params.include_ic_ES:
+
+        file = snakemake.params.ic_ES_file
+
+        with open(file, 'r') as archivo:
+            ic_dic = yaml.safe_load(archivo)
+
+        attach_interconnections_ES(n, ic_dic)
+
+    ########################################
+
+
     sanitize_carriers(n, snakemake.config)
     sanitize_locations(n)
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
     n.export_to_netcdf(snakemake.output[0])
+
+
+

@@ -37,9 +37,6 @@ from pypsa.io import import_components_from_dataframe
 from scipy.stats import beta
 
 
-########## ES
-# import yaml to read interconnections data
-import yaml
 
 
 spatial = SimpleNamespace()
@@ -3734,75 +3731,7 @@ if __name__ == "__main__":
 
     
 
-    ######################################## Este parece un buen sitio para incluir modificaciones a la prenetwork
-
-    #################### Add interconnections
-    if snakemake.params.include_ic_ES:
-
-        file = snakemake.params.ic_ES_file
-
-        with open(file, 'r') as archivo:
-            ic_dic = yaml.safe_load(archivo)
-
-
-        for kk, vv in ic_dic.items():
-
-            print(f'########## pypsa-es [prepare_sector_network.py]: Adding elements of interconnection {kk}')
-
-
-            ########## Identify the closest bus:
-            ### Select candidates: los buses peninsulares con AC (para no repetir)         
-            candidates = n.buses.loc[ (n.buses.index.str.contains('ES0')) & (n.buses['carrier']=='AC'), ['x', 'y']]
-            # print(f'candidates: {candidates}')
-            ### Compute distances
-            x0 = ic_dic[kk]['bus_params']['x']
-            y0 = ic_dic[kk]['bus_params']['y']
-            distances = np.sqrt((candidates['x'] - x0)**2 + (candidates['y'] - y0)**2)
-            # print(f'distances: {distances}')
-            ### Find closes bus, and assign it to the correct side of the link
-            closest_bus_index = distances.idxmin()
-            # print(f'closest_bus_index: {closest_bus_index}')
-            ic_dic[kk]['link_params']['bus0'] = closest_bus_index
-            ic_dic[kk]['link_params_rev']['bus1'] = closest_bus_index
-
-
-
-            ########## Add bus
-            n.add('Bus', ic_dic[kk]['bus_name'], **ic_dic[kk]['bus_params'])
-            n.buses.loc[ic_dic[kk]['bus_name'], 'country'] = 'ES'
-            n.buses.loc[ic_dic[kk]['bus_name'], 'location'] = 'ES FR0'
-
-			########## Add links
-            n.add('Link', ic_dic[kk]['link_name'], **ic_dic[kk]['link_params'])
-            ##### adding 'reversed' feature, parece que no se puede incluir con add porque no es característica original?
-
-#            n.links.loc[ic_dic[kk]['link_name'], 'reversed'] = False  ##### esta condición impide que se guarde con to_netcdf
-            n.links.loc[ic_dic[kk]['link_name'], 'underground'] = False
-            n.links.loc[ic_dic[kk]['link_name'], 'under_construction'] = False
-            n.links.loc[ic_dic[kk]['link_name'], 'underwater_fraction'] = 0
-
-
-			########## Add links rev?
-            n.add('Link', ic_dic[kk]['link_name_rev'], **ic_dic[kk]['link_params_rev'])
-
-
-
-			########## Add generator
-            n.add('Generator', ic_dic[kk]['generator_name'], **ic_dic[kk]['generator_params'])
-
-            ########## Add generator_t: marginal cost
-            ### linearly increasing costs, from 0 to 200
-            N = len(n.generators_t['marginal_cost'])
-            n.generators_t['marginal_cost'][ic_dic[kk]['generator_name']] = np.linspace(0,200,N)
- 
-			########## Add load
-            n.add('Load', ic_dic[kk]['load_name'], **ic_dic[kk]['load_params'])
-
-			########## Add load_t
-            ### Large enough to not be fully served by the interconnection
-            n.loads_t['p_set'][ic_dic[kk]['load_name']] = 1200
-
-
+    ########## Aquí es donde originalmente intenté poner las interconexiones
 
 
 

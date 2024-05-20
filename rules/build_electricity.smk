@@ -634,11 +634,15 @@ rule cluster_network:
         "../scripts/cluster_network.py"
 
 
+
+######################################## Modified to include ES interconnections
 rule add_extra_components:
     params:
         extendable_carriers=config_provider("electricity", "extendable_carriers"),
         max_hours=config_provider("electricity", "max_hours"),
         costs=config_provider("costs"),
+        include_ic_ES=config_provider("pypsa_es","interconnections", "include_ic_ES"),   #####
+        ic_ES_file=config_provider("pypsa_es","interconnections", "ic_ES_file"),   #####
     input:
         network=resources("networks/elec_s{simpl}_{clusters}.nc"),
         tech_costs=lambda w: resources(

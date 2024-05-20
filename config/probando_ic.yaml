@@ -380,6 +380,7 @@ pypsa_eur:   ########## Aquí se fijan qué elementos se quedan, ver function "r
   - solar
   - ror
   - nuclear
+  - biomass ##### este es el carrier que uso en las ics
   StorageUnit:
   - PHS
   - hydro
@@ -761,7 +762,7 @@ costs:
   # capital_cost:
   #   onwind: 500
   marginal_cost:
-    solar: 100.01
+    solar: 0.01
     onwind: 0.015
     offwind: 0.015
     hydro: 0.
@@ -800,6 +801,7 @@ clustering:
     resolution_sector: false
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#adjustments
+########## ver "maybe_adjust_costs_and_potentials" en "prepare_network.py"
 adjustments:
   electricity: false
   sector: false
