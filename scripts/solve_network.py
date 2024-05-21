@@ -697,12 +697,6 @@ def add_lossy_bidirectional_link_constraints(n):
 
 
 
-
-
-    ##### print(n.links["reversed"])
-    ##### input('point 3')
-
-
     #################### Patch para que la inclusión de las interconexiones no dé problemas con el reversed
 
     ##### Aquí se identifica AC como carrier con 'reversed'
@@ -714,11 +708,6 @@ def add_lossy_bidirectional_link_constraints(n):
         "carrier in @carriers and ~reversed and p_nom_extendable"
     ).index
 
-    ##### Así que eliminamos las que tienen 'ic' en el índice  ########## YA NO, porque dejamos que se haga reversed
-    ##### forward_i = forward_i[~forward_i.str.contains('ic')]
-
-    ##### print(forward_i)
-    ##### input('point 5')
 
 
 
@@ -737,8 +726,6 @@ def add_lossy_bidirectional_link_constraints(n):
 
     backward_i = get_backward_i(forward_i)
 
-    print(backward_i)
-    input('point 6')
 
 
 
@@ -986,7 +973,6 @@ if __name__ == "__main__":
     )
 
 
-    input('Empieza solve_network..')
 
     with memory_logger(
         filename=getattr(snakemake.log, "memory", None), interval=30.0

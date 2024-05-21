@@ -275,7 +275,17 @@ def calculate_curtailment(n, label, curtailment):
 
 
 def calculate_energy(n, label, energy):
+
+
+    ######################################## Pruebo a cancelar esto
+    print('#################### pypsa-es [make_summary.py] : "calculate_energy" desactivado, por error que no localizo..')
+    return
+
+
     for c in n.iterate_components(n.one_port_components | n.branch_components):
+
+        ##### looking for error: link
+
         if c.name in n.one_port_components:
             c_energies = (
                 c.pnl.p.multiply(n.snapshot_weightings.generators, axis=0)
@@ -285,19 +295,40 @@ def calculate_energy(n, label, energy):
                 .sum()
             )
         else:
+
+            print(c.name)
+            input('c.name')
+
+
             c_energies = pd.Series(0.0, c.df.carrier.unique())
-            for port in [col[3:] for col in c.df.columns if col[:3] == "bus"]:
+
+            ##### Esto es para iterar sobre lo que sigue allá donde empieza por "bus"
+            for port in [col[3:] for col in c.df.columns if col[:3] == "bus"]: 
+
+             
+                print(port)
+                input('port')
+
                 totals = (
                     c.pnl["p" + port]
                     .multiply(n.snapshot_weightings.generators, axis=0)
                     .sum()
                 )
+
+
+                print(totals)
+                input('totals')
+
+
                 # remove values where bus is missing (bug in nomopyomo)
                 no_bus = c.df.index[c.df["bus" + port] == ""]
+                
                 totals.loc[no_bus] = float(
                     n.component_attrs[c.name].loc["p" + port, "default"]
                 )
+
                 c_energies -= totals.groupby(c.df.carrier).sum()
+
 
         c_energies = pd.concat([c_energies], keys=[c.list_name])
 
@@ -313,6 +344,8 @@ def calculate_supply(n, label, supply):
     Calculate the max dispatch of each component at the buses aggregated by
     carrier.
     """
+
+
     bus_carriers = n.buses.carrier.unique()
 
     for i in bus_carriers:
@@ -626,6 +659,8 @@ def calculate_price_statistics(n, label, price_statistics):
 
 
 def make_summaries(networks_dict):
+
+    #################### capo algunas salidas que me dan problemas
     outputs = [
         "nodal_costs",
         "nodal_capacities",
@@ -660,6 +695,11 @@ def make_summaries(networks_dict):
 
         for output in outputs:
             df[output] = globals()["calculate_" + output](n, label, df[output])
+            
+            ##### Monitoreo, a ver cuál rompe y por qué
+            #print(output)
+            #print(df[output])
+            #input()
 
     return df
 

@@ -178,7 +178,7 @@ electricity:
     H2: 168
 
   extendable_carriers:
-    Generator: [] ######################################## [solar, onwind, offwind-ac, offwind-dc, OCGT]
+    Generator: [solar, onwind, offwind-ac, offwind-dc] ######################################## [solar, onwind, offwind-ac, offwind-dc, OCGT]
     StorageUnit: [] # battery, H2
     Store: [] ############################################################[battery, H2]
     Link: [] # H2 pipeline ########## Esto es lo que se comprueba en add_extra_components para añadir la red de H2
@@ -625,7 +625,8 @@ sector:
     gas pipeline:
       efficiency_per_1000km: 1 #0.977
       compression_per_1000km: 0.01
-  H2_network: true      ########## Enabler at fun add_storage_and_grids (at: 'prepare_sector_network.py')
+  H2_network: false      ########## Enabler at fun add_storage_and_grids (at: 'prepare_sector_network.py')
+                        ##### Ojo porque si pones la red de H2 pero se queda vacía porque no era la idea, da error en el summary
                         ############################## DISABLER at: 'prepare_sector_network.py': if false, removes the existing one
   gas_network: false   ########## Enabler at fun add_storage_and_grids (at: 'prepare_sector_network.py')
   H2_retrofit: false   ########## Enabler at fun add_storage_and_grids (at: 'prepare_sector_network.py')

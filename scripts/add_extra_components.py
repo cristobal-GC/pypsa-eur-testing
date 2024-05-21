@@ -267,18 +267,9 @@ def attach_interconnections_ES(n, ic_dic):
         ########## Add links
         n.add('Link', ic_dic[kk]['link_name'], **ic_dic[kk]['link_params'])
 
-        #n.links.loc[ic_dic[kk]['link_name'], 'underground'] = False
-
-        ##### looking for ic capital costs = na
-        print(n.links[['capital_cost', 'underwater_fraction', 'underground']])
-        input('inner check A')
-
-        n.links.loc[ic_dic[kk]['link_name'], 'underwater_fraction'] = 0
-
-
-        ##### looking for ic capital costs = na
-        print(n.links[['capital_cost', 'underwater_fraction', 'underground']])
-        input('inner check B')
+        n.links.loc[ic_dic[kk]['link_name'], 'underwater_fraction'] = 0.0
+        # n.links.loc[ic_dic[kk]['link_name'], 'underground'] = False      ### No consigo que esta línea no falle al guardar
+        # n.links.loc[ic_dic[kk]['link_name'], 'under_construction'] = 0
 
 
 
@@ -286,16 +277,15 @@ def attach_interconnections_ES(n, ic_dic):
         n.add('Generator', ic_dic[kk]['generator_name'], **ic_dic[kk]['generator_params'])
 
         ########## Add generator_t: marginal cost
-        ### linearly increasing costs, from 0 to 200
-        N = len(n.generators_t['marginal_cost'])
-        n.generators_t['marginal_cost'][ic_dic[kk]['generator_name']] = np.linspace(0,200,N)
+        df_ic_prices = pd.read_csv(ic_dic[kk]['generator_prices'])
+        n.generators_t['marginal_cost'][ic_dic[kk]['generator_name']] = df_ic_prices.values
 
         ########## Add load
         n.add('Load', ic_dic[kk]['load_name'], **ic_dic[kk]['load_params'])
 
         ########## Add load_t
         ### Large enough to not be fully served by the interconnection
-        n.loads_t['p_set'][ic_dic[kk]['load_name']] = 1200
+        n.loads_t['p_set'][ic_dic[kk]['load_name']] = 9999
 
 
 

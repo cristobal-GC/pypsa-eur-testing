@@ -395,6 +395,12 @@ def create_network_topology(
         [n.lines[ln_attrs], n.links.loc[n.links.carrier.isin(carriers), lk_attrs]]
     ).fillna(0)
 
+
+    ############################## pypsa-es : 
+    ##### elimina los candidatos con 'ic': interconexiones
+    candidates = candidates[~candidates.index.str.contains('ic')]
+
+
     # base network topology purely on location not carrier
     candidates["bus0"] = candidates.bus0.map(n.buses.location)
     candidates["bus1"] = candidates.bus1.map(n.buses.location)
@@ -1131,6 +1137,8 @@ def add_storage_and_grids(n, costs):
     logger.info("Add hydrogen storage")
 
     nodes = pop_layout.index
+
+
 
     n.add("Carrier", "H2")
 
@@ -3607,6 +3615,8 @@ if __name__ == "__main__":
         nyears,
     )
 
+
+
     ########## Esto lo quito como parte de la simlificación al no usar realmente los sectores
     # pop_weighted_energy_totals = (
     #     pd.read_csv(snakemake.input.pop_weighted_energy_totals, index_col=0) * nyears
@@ -3616,7 +3626,11 @@ if __name__ == "__main__":
     # )
     # pop_weighted_energy_totals.update(pop_weighted_heat_totals)
 
+
+
     patch_electricity_network(n)
+
+
 
     spatial = define_spatial(pop_layout.index, options)
 
@@ -3633,7 +3647,12 @@ if __name__ == "__main__":
 
     add_generation(n, costs)
 
+
+    ##### Aquí es donde se añade la red de H2
     add_storage_and_grids(n, costs)
+
+
+
 
     if options["transport"]:
         add_land_transport(n, costs)
@@ -3730,8 +3749,6 @@ if __name__ == "__main__":
         cluster_heat_buses(n)
 
     
-
-    ########## Aquí es donde originalmente intenté poner las interconexiones
 
 
 
