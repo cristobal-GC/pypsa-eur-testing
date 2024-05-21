@@ -34,7 +34,7 @@ pypsa_es:
     solar: ''
   electricity_demand:
     customised: true ########## set to 'True' to provide customised demand for ES. 
-                     ##########        'False' to follow standard pypsa-es procedure 
+                     ##########        'False' to follow standard pypsa-eur procedure 
                      ##########                (including 'retrieve_electricity_demand', which is somehow heavy..)
     update_weights: true ########## To use weights 'gdp' and 'pop' obtained for ES, 0.18 and 0.82 (rather than 0.6 and 0.4)
                          # used in rule: add_electricity, function: attach_load
