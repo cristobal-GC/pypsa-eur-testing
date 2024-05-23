@@ -177,8 +177,10 @@ def set_transmission_limit(n, ll_type, factor, costs, Nyears=1):
     )
 
 
-    ########## ¿qué hace esto? las cifras de capital cost se han minorado en ambos links
-    update_transmission_costs(n, costs)
+    ########## pypsa-ES: potential bug, because no length_factor is included (as in add_electricity)
+    ##### Lets put 1.25, which is the default value in config.yaml:lines
+    # update_transmission_costs(n, costs)
+    update_transmission_costs(n, costs, length_factor=1.25)
 
 
 
