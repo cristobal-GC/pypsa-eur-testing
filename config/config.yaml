@@ -160,9 +160,9 @@ co2_budget:
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#electricity
 electricity:
   voltages: [220., 300., 380., 500., 750.]
-  gaslimit_enable: false
+  gaslimit_enable: false ########## Esto activa una "GlobalConstraint: GasLimit" basada en gaslimit en "prepare_network.py"
   gaslimit: false
-  co2limit_enable: false ########## estos co2limit y co2base entran por rule "prepare_network"
+  co2limit_enable: false ########## Esto activa una "GlobalConstraint: CO2Limit" basada en co2limit en "prepare_network.py"
   co2limit: 7.75e+7
   co2base: 1.487e+9
   agg_p_nom_limits: data/agg_p_nom_minmax.csv ########## esto entra en solve_network!!! (que no se invoca por sectores)
@@ -326,7 +326,7 @@ lines:
     380.: "Al/St 240/40 4-bundle 380.0"
     500.: "Al/St 240/40 4-bundle 380.0"
     750.: "Al/St 560/50 4-bundle 750.0"
-  s_max_pu: 0.7 ########## Este es el criterio N-1 security margin (ver prepare_network.py)
+  s_max_pu: 0.7 ########## Este es el criterio N-1 security margin (ver prepare_network.py), se pone en n.lines.s_max_pu
   s_nom_max: .inf
   max_extension: 20000 #MW
   length_factor: 1.25
@@ -613,7 +613,7 @@ sector:
   electricity_transmission_grid: true   ############################## DISABLER at: 'prepare_sector_network.py': if false, removes the existing one
   electricity_distribution_grid: false   ############################## Enabler at: 'prepare_sector_network.py'
   electricity_distribution_grid_cost_factor: 1.0
-  electricity_grid_connection: true
+  electricity_grid_connection: true   ########## [prepare_sector_network.py] To add connection costs to carriers 'solar' and 'onwind' 
   transmission_efficiency:
     DC:
       efficiency_static: 0.98
@@ -756,11 +756,11 @@ costs:
     lifetime: 25
     "CO2 intensity": 0
     "discount rate": 0.07
-  # Marginal and capital costs can be overwritten
+  # Marginal and capital costs can be overwritten ########## Pero ojo, que hay que entender qué se muestra en la columna 'capital_cost' de los generadores, para poder poner valores con sentido, ya que lo que pongas aquí se reemplaza directamente
   # capital_cost:
   #   onwind: 500
   marginal_cost:
-    solar: 100.01
+    solar: 0.01
     onwind: 0.015
     offwind: 0.015
     hydro: 0.
@@ -769,7 +769,7 @@ costs:
     fuel cell: 0.
     battery: 0.
     battery inverter: 0.
-  emission_prices:
+  emission_prices: ########## Employed in prepare_network.py, see there difference between prices and dynamic prices
     enable: false
     co2: 0.
     co2_monthly_prices: false
@@ -799,6 +799,7 @@ clustering:
     resolution_sector: false
 
 # docs in https://pypsa-eur.readthedocs.io/en/latest/configuration.html#adjustments
+########## These are included in prepare_network.py
 adjustments:
   electricity: false
   sector: false
