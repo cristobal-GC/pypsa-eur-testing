@@ -636,7 +636,8 @@ sector:
   biomass_transport: false
   biogas_upgrading_cc: false
   conventional_generation: ########## Aquí es donde se introducen links, function "add_generation", script "prepare_sector_network.py"
-    OCGT: gas
+                           # Ojo por que no es un reemplazo, sino una eliminación acompañada de la adición de links. Por eso no pongo los OCGT
+    # OCGT: gas
     CCGT: gas   ########## Incluyo CCGT
   biomass_to_liquid: false
   biosng: false
@@ -745,7 +746,7 @@ industry:
 costs:
   year: 2030
   version: v0.8.1
-  rooftop_share: 0.14  # based on the potentials, assuming  (0.1 kW/m2 and 10 m2/person)
+  rooftop_share: 0.14  # based on the potentials, assuming  (0.1 kW/m2 and 10 m2/person) # Esto es lo que se usa para calcular el capital_cost de 'solar' en 'electricity_network.py', combinando los costes de capita de 'solar-utility' y 'solar-rooftop'. Sin embarto, en 'prepare_sector_network.py' se usa solo 'solar-utility', ya que los otros tipos de 'solar-...' se activan con la distribution grid.
   social_discountrate: 0.02
   fill_values:
     FOM: 0
@@ -756,9 +757,9 @@ costs:
     lifetime: 25
     "CO2 intensity": 0
     "discount rate": 0.07
-  # Marginal and capital costs can be overwritten ########## Pero ojo, que hay que entender qué se muestra en la columna 'capital_cost' de los generadores, para poder poner valores con sentido, ya que lo que pongas aquí se reemplaza directamente
-  # capital_cost:
-  #   onwind: 500
+  # Marginal and capital costs can be overwritten ########## Pero ojo, que lo que va aquí no es directamente el dato que aparece en costs.csv, aquí va el coste anualizado, teniendo en cuenta la discount_rate. Además, para 'solar' se calcula a partir de 'solar-rooftop y solar-utiliy teniendo en cuenta 'costs:rooftop_share'. Ojo a lifetime, y a social_discountrate
+  capital_cost:
+#    solar: 
   marginal_cost:
     solar: 0.01
     onwind: 0.015

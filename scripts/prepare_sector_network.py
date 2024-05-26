@@ -582,7 +582,7 @@ def remove_non_electric_buses(n):
 
 
 def patch_electricity_network(n):
-    remove_elec_base_techs(n)
+    remove_elec_base_techs(n)   ########## ESTA FUNCIÓN ES KILLER, PORQUE SOLO DEJA BUSES ELÉCTRICOS!
     remove_non_electric_buses(n)
     update_wind_solar_costs(n, costs)
     n.loads["carrier"] = "electricity"
@@ -887,7 +887,16 @@ def add_generation(n, costs):
     fallback = {"OCGT": "gas"}
     conventionals = options.get("conventional_generation", fallback)
 
+
+    print(f'#################### pypsa-ES: OVERWRITTING options["conventional_generation"] to just have CCGT: gas ####################')
+    conventionals = {'CCGT': 'gas'}
+
+
     for generator, carrier in conventionals.items():
+
+        print(f'Adding links for (ex)generator: {generator}: {carrier}')
+        input(...)
+
         carrier_nodes = vars(spatial)[carrier].nodes
 
         add_carrier_buses(n, carrier, carrier_nodes)
@@ -3600,6 +3609,10 @@ if __name__ == "__main__":
     update_config_from_wildcards(snakemake.config, snakemake.wildcards)
 
     options = snakemake.params.sector
+    #################### Aquí es donde hay un comportamiento inesperado, porque la información de config.yaml:sector:conventional_generation , donde se especifican los generadores que pasan a links, incluye OCGT, aunque ponga solo CCGT. Parece ser algo que sucede durante la lectura del config.yaml
+    # print(options["conventional_generation"])
+    # input('Ha includigo OCGT?')
+
 
     investment_year = int(snakemake.wildcards.planning_horizons[-4:])
 
