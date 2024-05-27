@@ -427,20 +427,37 @@ def create_network_topology(
 
 
 # TODO merge issue with PyPSA-Eur
-def update_wind_solar_costs(n, costs):
+def update_wind_solar_costs(n, costs, rooftop_share=0): ##### pypsa-ES: añado parámetro rooftop_share para usarlo, si conviene
     """
     Update costs for wind and solar generators added with pypsa-eur to those
     cost in the planning year.
     """
+
+
+    ########## pypsa-ES: aquí es donde machaco el coste de solar-utility por la mezcla de ella misma con share-rooftop, como solía hacerse en add_electricity. Y lo pongo en solar-utility porque es ese valor el que se usa en esta función para alimentar el coste de 'solar' en la network. Aún faltará hacer lo mismo al añadir los grid connection costs
+
+    coste_combinado = rooftop_share * costs.at["solar-rooftop", "fixed"] + (1 - rooftop_share) * costs.at["solar-utility", "fixed"]
+
+    costs.at["solar-utility", "fixed"] = coste_combinado
+
+
+
+
     # NB: solar costs are also manipulated for rooftop
     # when distribution grid is inserted
     n.generators.loc[n.generators.carrier == "solar", "capital_cost"] = costs.at[
         "solar-utility", "fixed"
     ]
 
+
     n.generators.loc[n.generators.carrier == "onwind", "capital_cost"] = costs.at[
         "onwind", "fixed"
     ]
+
+
+
+
+
 
     # for offshore wind, need to calculated connection costs
 
@@ -581,10 +598,12 @@ def remove_non_electric_buses(n):
         n.buses = n.buses[n.buses.carrier.isin(["AC", "DC"])]
 
 
+
+
 def patch_electricity_network(n):
     remove_elec_base_techs(n)   ########## ESTA FUNCIÓN ES KILLER, PORQUE SOLO DEJA BUSES ELÉCTRICOS!
     remove_non_electric_buses(n)
-    update_wind_solar_costs(n, costs)
+    update_wind_solar_costs(n, costs, rooftop_share)
     n.loads["carrier"] = "electricity"
     n.buses["location"] = n.buses.index
     n.buses["unit"] = "MWh_el"
@@ -894,8 +913,9 @@ def add_generation(n, costs):
 
     for generator, carrier in conventionals.items():
 
+        ##########
         print(f'Adding links for (ex)generator: {generator}: {carrier}')
-        input(...)
+        #input(...)
 
         carrier_nodes = vars(spatial)[carrier].nodes
 
@@ -3614,9 +3634,16 @@ if __name__ == "__main__":
     # input('Ha includigo OCGT?')
 
 
+
+    ##### pypsa-ES : para usar rooftop_share
+    rooftop_share = snakemake.params.costs['rooftop_share']
+
+
+
     investment_year = int(snakemake.wildcards.planning_horizons[-4:])
 
     n = pypsa.Network(snakemake.input.network)
+
 
     pop_layout = pd.read_csv(snakemake.input.clustered_pop_layout, index_col=0)
     nhours = n.snapshot_weightings.generators.sum()
@@ -3661,8 +3688,10 @@ if __name__ == "__main__":
     add_generation(n, costs)
 
 
+
     ##### Aquí es donde se añade la red de H2
     add_storage_and_grids(n, costs)
+
 
 
 
@@ -3760,9 +3789,6 @@ if __name__ == "__main__":
 
     if options.get("cluster_heat_buses", False) and not first_year_myopic:
         cluster_heat_buses(n)
-
-    
-
 
 
     n.meta = dict(snakemake.config, **dict(wildcards=dict(snakemake.wildcards)))
