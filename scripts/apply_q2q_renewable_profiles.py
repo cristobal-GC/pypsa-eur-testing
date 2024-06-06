@@ -67,6 +67,16 @@ if __name__ == "__main__":
         with open(name_of_function, 'rb') as f:
             interp_func = pickle.load(f)
 
+            ##### Replace values in [1, 1.001] by 1 ##### (TODO: extend q2q transforms a bit beyond 1.0)
+            # Crear una máscara para seleccionar los valores entre 1 y 1.001
+            variable_data = profile_data['profile']
+            mask = (variable_data >= 1) & (variable_data <= 1.001)
+            # Reemplazar los valores que cumplen la condición por 1
+            variable_data = variable_data.where(~mask, 1)
+            # Asignar el DataArray modificado de vuelta al dataset
+            profile_data['profile'] = variable_data
+
+
             profile_data["profile"][:, :, :] = interp_func(profile_data.variables["profile"])
 
             profile_data.to_netcdf(profile)
